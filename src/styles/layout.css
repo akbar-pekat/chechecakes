@@ -1,0 +1,37 @@
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "Instrument Sans";
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  background-color: #f3f5f6;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background-color: #f4f4f0;
+  border-left: 1px solid #000000;
+  border-right: 1px solid #000000;
+  width: 100%;
+  max-width: 500px;
+  height: 100vh;
+}
+
+nav {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+  background-color: #ffffff;
+  border-bottom: 1px solid #000000;
+}
+
+nav img {
+  height: 47px;
+  user-select: none;
+  -webkit-user-drag: none;
+}

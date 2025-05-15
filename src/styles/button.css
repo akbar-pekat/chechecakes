@@ -1,0 +1,74 @@
+:root {
+  --btn-bg: #000;
+  --btn-color: #fff;
+  --btn-bg-hover: #cc9543;
+  --btn-outline-bg-hover: #fff;
+
+  --btn-radius: 4px;
+  --btn-padding: 12px;
+  --btn-font-size: 16px;
+  --btn-line-height: 24px;
+  --btn-transition: all 0.3s ease;
+  --btn-shadow: 4px 4px 0 rgba(0, 0, 0, 1);
+}
+
+.button {
+  background-color: var(--btn-bg);
+  color: var(--btn-color);
+  border: none;
+  border-radius: var(--btn-radius);
+  padding: var(--btn-padding);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--btn-transition);
+  user-select: none;
+  text-decoration: none;
+  font-size: var(--btn-font-size);
+  line-height: var(--btn-line-height);
+  font-weight: 400;
+  text-align: center;
+  position: relative;
+}
+
+.button:not(.disabled):hover {
+  background-color: var(--btn-bg-hover);
+  border: 1px solid var(--btn-bg);
+  box-shadow: var(--btn-shadow);
+}
+
+.button.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.button.outline {
+  background-color: transparent;
+  border: 1px solid var(--btn-bg);
+  color: var(--btn-bg);
+}
+
+.button.outline:not(.disabled):hover {
+  background-color: var(--btn-outline-bg-hover);
+}
+
+.button.link {
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  color: var(--btn-bg);
+}
+
+.button.link:not(.disabled):hover {
+  background-color: transparent;
+  text-decoration: underline;
+  box-shadow: none;
+  border: none;
+}
+
+.button.block {
+  width: 100%;
+}

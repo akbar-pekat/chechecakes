@@ -1,0 +1,193 @@
+---
+interface Props {
+  label: string;
+  instruction: string;
+  placeholder: string;
+  id: string;
+  type?: "text" | "tel" | "email";
+  minLength?: number;
+}
+
+const {
+  label,
+  instruction,
+  placeholder,
+  id,
+  type = "text",
+  minLength = type === "tel" ? 10 : type === "text" && id === "alamatlengkap" ? 10 : 3,
+} = Astro.props;
+
+import "../styles/input.css";
+---
+
+<div class="inputs">
+  <div class="header">
+    <div class="label">{label}</div>
+    <div class="instruksi">{instruction}</div>
+  </div>
+  <input
+    type={type}
+    placeholder={placeholder}
+    class="textInput"
+    id={id}
+    pattern={type === "tel" ? "[0-9]*" : undefined}
+    inputmode={type === "tel" ? "numeric" : undefined}
+    minlength={minLength.toString()}
+  />
+  <div class="errorText" id={`${id}-error`} style="display: none;"></div>
+</div>
+
+<script>
+  declare global {
+    interface Window {
+      getInputValue: (inputId: string) => string;
+      validateAllInputs: () => boolean;
+    }
+  }
+
+  function formatPhoneNumber(value: string): string {
+    // Hapus semua karakter non-angka
+    let cleaned = value.replace(/\D/g, "");
+
+    // Jika dimulai dengan 62, ubah menjadi 0
+    if (cleaned.startsWith("62")) {
+      cleaned = "0" + cleaned.slice(2);
+    }
+
+    // Jika dimulai dengan +62, ubah menjadi 0
+    if (cleaned.startsWith("+62")) {
+      cleaned = "0" + cleaned.slice(3);
+    }
+
+    return cleaned;
+  }
+
+  function isValidIndonesianPhone(value: string): boolean {
+    const phoneRegex = /^08[0-9]{8,10}$/;
+    return phoneRegex.test(value);
+  }
+
+  function getErrorMessage(input: HTMLInputElement, value: string): string {
+    // Kode promo tidak wajib diisi
+    if (input.id === "kodepromo") {
+      return "";
+    }
+
+    if (value === "") {
+      return "Formnya masih kosong, yuk isi dulu!";
+    }
+
+    if (input.type === "tel") {
+      const formattedValue = formatPhoneNumber(value);
+
+      if (!isValidIndonesianPhone(formattedValue)) {
+        return "Masukkan nomor telepon yang mulai dengan 08/62 ya!";
+      }
+      if (!/^[0-9]+$/.test(formattedValue)) {
+        return "Nomornya kayaknya belum benar.";
+      }
+    } else {
+      const minLength = input.minLength ? Number(input.minLength) : 3;
+      if (value.length < minLength) {
+        if (input.id === "alamatlengkap") {
+          return "Alamatnya terlalu singkat, tambahin lagi ya.";
+        }
+        return "Ayo, tambah sedikit lagi! Minimal 3 karakter.";
+      }
+    }
+
+    return "";
+  }
+
+  function validateInput(input: HTMLInputElement, errorElement: HTMLElement) {
+    const value = input.value.trim();
+    const errorMessage = getErrorMessage(input, value);
+
+    if (errorMessage) {
+      errorElement.textContent = errorMessage;
+      errorElement.style.display = "block";
+      input.classList.add("error");
+      return false;
+    } else {
+      errorElement.style.display = "none";
+      input.classList.remove("error");
+      return true;
+    }
+  }
+
+  // Mendapatkan semua input di halaman
+  const inputs = document.querySelectorAll(".textInput");
+
+  inputs.forEach((input) => {
+    const inputElement = input as HTMLInputElement;
+    const errorElement = document.getElementById(`${inputElement.id}-error`);
+
+    if (errorElement) {
+      // Validasi saat input kehilangan fokus
+      inputElement.addEventListener("blur", () => {
+        validateInput(inputElement, errorElement);
+      });
+
+      // Validasi saat input berubah
+      inputElement.addEventListener("input", () => {
+        if (inputElement.value.trim() !== "") {
+          validateInput(inputElement, errorElement);
+        } else {
+          errorElement.style.display = "none";
+          inputElement.classList.remove("error");
+        }
+      });
+
+      // Format nomor telepon saat mengetik
+      if (inputElement.type === "tel") {
+        inputElement.addEventListener("input", (e) => {
+          let value = inputElement.value;
+
+          // Izinkan input + di awal
+          if (value.startsWith("+")) {
+            value = "+" + value.slice(1).replace(/\D/g, "");
+          } else {
+            value = value.replace(/\D/g, "");
+          }
+
+          // Batasi panjang maksimal
+          if (value.length > 13) {
+            value = value.slice(0, 13);
+          }
+
+          inputElement.value = value;
+        });
+      }
+    }
+  });
+
+  // Fungsi untuk mendapatkan nilai input
+  window.getInputValue = function (inputId: string): string {
+    const input = document.getElementById(inputId) as HTMLInputElement;
+    if (!input) return "";
+
+    const value = input.value.trim();
+    if (input.type === "tel") {
+      return formatPhoneNumber(value);
+    }
+    return value;
+  };
+
+  // Fungsi untuk validasi semua input
+  window.validateAllInputs = function (): boolean {
+    let isValid = true;
+    inputs.forEach((input) => {
+      const inputElement = input as HTMLInputElement;
+      // Skip validasi untuk kode promo
+      if (inputElement.id === "kodepromo") return;
+      
+      const errorElement = document.getElementById(`${inputElement.id}-error`);
+      if (errorElement) {
+        if (!validateInput(inputElement, errorElement)) {
+          isValid = false;
+        }
+      }
+    });
+    return isValid;
+  };
+</script>

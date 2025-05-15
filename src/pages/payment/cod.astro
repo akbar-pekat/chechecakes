@@ -1,0 +1,189 @@
+---
+import Layout from "../../layouts/layout.astro";
+import Button from "../../components/button.astro";
+---
+
+<Layout>
+  <div class="container">
+    <div class="finishCard" id="finishCardSuccess">
+      <img src="/done.svg" class="illust" alt="IllustCart" />
+      <h2>Tinggal satu langkah lagi~</h2>
+      <div class="description">
+        Makasih ya udah pesen di Cheche Cakes 💖, sekarang tinggal kirim pesanan
+        ini ke WhatsApp admin biar cepet diproses.
+      </div>
+      <div class="buttonGroup">
+        <Button style="outline">Kembali ke beranda</Button>
+        <Button id="whatsappButton">Kirim ke WhatsApp</Button>
+      </div>
+      <div class="smallNote">
+        Jangan utak-atik pesan WA-nya.
+        <br />
+        Langsung kirim aja ya biar admin bisa proses cepat 🙌
+      </div>
+    </div>
+
+    <div class="finishCard" id="finishCardEmpty">
+      <img src="/cart.svg" class="illust" alt="IllustCart" />
+      <h2>Oops, pesanan kamu belum ada nih!</h2>
+      <div class="description">
+        Kayaknya kamu belum pesan, yuk balik ke menu buat pilih favoritmu dulu!
+      </div>
+      <div class="buttonGroup">
+        <Button href="/">Lihat menu</Button>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const finishCardSuccess = document.getElementById("finishCardSuccess");
+    const finishCardEmpty = document.getElementById("finishCardEmpty");
+    const whatsappButton = document.getElementById("whatsappButton");
+    const backButton = document.querySelector(
+      ".buttonGroup button:first-child"
+    );
+
+    console.log("Back button element:", backButton); // Debug
+
+    const cartData = localStorage.getItem("cart");
+    const customerData = localStorage.getItem("customerData");
+    let hasClickedWhatsApp = false;
+
+    if (cartData && customerData) {
+      if (finishCardSuccess) finishCardSuccess.style.display = "flex";
+      if (finishCardEmpty) finishCardEmpty.style.display = "none";
+    } else {
+      if (finishCardSuccess) finishCardSuccess.style.display = "none";
+      if (finishCardEmpty) finishCardEmpty.style.display = "flex";
+    }
+
+    // Fungsi untuk memformat pesan WhatsApp
+    function formatWhatsAppMessage() {
+      const cart = JSON.parse(cartData || "[]");
+      const customer = JSON.parse(customerData || "{}");
+
+      let message = `*PESANAN BARU*\n\n`;
+      message += `*Detail Pelanggan:*\n`;
+      message += `Nama: ${customer.name}\n`;
+      message += `No. WA: ${customer.phone}\n`;
+      message += `Alamat: ${customer.address}\n`;
+      message += `Metode Bayar: ${customer.paymentMethod === "transfer" ? "Transfer" : "Bayar Tunai"}\n`;
+      message += `Metode Kirim: ${customer.deliveryMethod === "delivery" ? "Diantar" : "Ambil Sendiri"}\n\n`;
+
+      message += `*Detail Pesanan:*\n`;
+      cart.forEach((item: any, index: number) => {
+        message += `${index + 1}. ${item.name} x${item.quantity} = Rp${(parseInt(item.price) * item.quantity).toLocaleString("id-ID")}\n`;
+      });
+
+      message += `\n*Ringkasan Pembayaran:*\n`;
+      message += `Subtotal: Rp${customer.subtotal.toLocaleString("id-ID")}\n`;
+      message += `Ongkir: Rp${customer.deliveryFee.toLocaleString("id-ID")}\n`;
+      message += `Total: Rp${customer.total.toLocaleString("id-ID")}\n\n`;
+
+      message += `ID Pesanan: ${customer.orderId}`;
+
+      return encodeURIComponent(message);
+    }
+
+    // Event listener untuk tombol WhatsApp
+    if (whatsappButton) {
+      whatsappButton.addEventListener("click", () => {
+        const message = formatWhatsAppMessage();
+        const whatsappUrl = `https://wa.me/6285156220232?text=${message}`;
+        window.open(whatsappUrl, "_blank");
+        hasClickedWhatsApp = true;
+      });
+    }
+
+    // Event listener untuk tombol kembali
+    if (backButton) {
+      backButton.addEventListener("click", (e) => {
+        e.preventDefault(); // Prevent default navigation
+        
+        if (!hasClickedWhatsApp) {
+          alert("Jangan lupa kirim pesanan ke WhatsApp admin dulu ya! 🙏");
+          return;
+        }
+        
+        localStorage.removeItem("cart");
+        localStorage.removeItem("customerData");
+        window.location.href = "/";
+      });
+    } else {
+      console.log("Back button not found!"); // Debug
+    }
+  });
+</script>
+
+<style>
+  .container {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    align-items: flex-start;
+    justify-content: flex-start;
+    align-self: stretch;
+    flex: 1;
+    position: relative;
+    overflow-y: scroll;
+  }
+
+  .container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .illust {
+    height: 100px;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
+  .finishCard {
+    background: #ffffff;
+    border-radius: 4px;
+    border: 1px solid #000000;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    justify-content: flex-start;
+    align-self: stretch;
+    position: relative;
+  }
+
+  .finishCard h2 {
+    color: #000000;
+    text-align: center;
+    font-size: 20px;
+    line-height: 24px;
+    font-weight: 500;
+  }
+
+  .finishCard .description {
+    color: #000000;
+    text-align: center;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 400;
+  }
+
+  .buttonGroup {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .smallNote {
+    color: #808080;
+    text-align: center;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 400;
+    position: relative;
+    align-self: stretch;
+  }
+</style>

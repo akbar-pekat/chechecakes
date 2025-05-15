@@ -1,0 +1,35 @@
+---
+import "../styles/productCard.css";
+import Button from "../components/button.astro";
+
+const { product } = Astro.props;
+---
+
+<div class="productCard">
+  <div class="thumbnail" style={`background: url(${product.image});`}>
+    {
+      product.stock && (
+        <div class="ribbon">
+          <div class="stock">Sisa {product.stock}</div>
+        </div>
+      )
+    }
+    <div class="price">Rp{product.price.toLocaleString("id-ID")}</div>
+  </div>
+  <div class="data">
+    <div class="title">{product.name}</div>
+    <div class="description">
+      {product.description}
+    </div>
+  </div>
+  <div class="action">
+    <Button
+      style="block"
+      data-id={product.id}
+      data-name={product.name}
+      data-price={product.price}
+      data-image={product.image}
+      >Mau yang ini</Button
+    >
+  </div>
+</div>

@@ -1,0 +1,117 @@
+.categorySection {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.categorySection::-webkit-scrollbar {
+  display: none;
+}
+
+.categorySection .tabItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  position: relative;
+}
+
+.categorySection .tabItem .container {
+  border-radius: 999px;
+  padding: 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+
+  color: #000000;
+  text-align: center;
+  font-size: 14px;
+  line-height: 16px;
+  font-weight: 400;
+  text-wrap: nowrap;
+}
+
+.categorySection .tabItem .container:hover {
+  background: #ffffff;
+  padding: 12px 16px;
+  border: 1px solid #000000;
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1),
+    inset 0px 0px 0px 2px rgba(0, 0, 0, 1);
+}
+
+.categorySection .tabItem .container.active {
+  background: #ffffff;
+  border: 1px solid #000000;
+  padding: 12px 16px;
+  font-weight: 500;
+}
+
+.productList {
+  padding: 0px 16px 100px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  position: relative;
+  overflow-y: auto;
+  scrollbar-width: none;
+  flex: 1;
+}
+
+.productList::-webkit-scrollbar {
+  display: none;
+}
+
+.footerCart {
+  background: #ffffff;
+  border-top: 1px solid #000000;
+  width: 100%;
+  max-width: 500px;
+  position: fixed;
+  bottom: 0;
+}
+
+.footerCart .container {
+  padding: 18px 16px 18px 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  align-self: stretch;
+}
+
+.footerCart .textContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  position: relative;
+}
+
+.footerCart .textContent .label {
+  color: #808080;
+  text-align: left;
+  font-size: 14px;
+  line-height: 16px;
+  font-weight: 400;
+  position: relative;
+}
+
+.footerCart .textContent .value {
+  color: #000000;
+  text-align: center;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  position: relative;
+}

@@ -1,0 +1,23 @@
+---
+export interface Props {
+  style?: string;
+  href?: string;
+  id?: string;
+}
+
+const { style, href, id, ...rest } = Astro.props;
+
+import "../styles/button.css";
+---
+
+{
+  href ? (
+    <a href={href} class={`button ${style}`} {...rest}>
+      <slot />
+    </a>
+  ) : (
+    <button class={`button ${style}`} id={id}  {...rest}>
+      <slot />
+    </button>
+  )
+}

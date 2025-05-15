@@ -1,0 +1,276 @@
+.container {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  align-self: stretch;
+  flex: 1;
+  position: relative;
+  overflow-y: scroll;
+}
+
+.container::-webkit-scrollbar {
+  display: none;
+}
+
+.illust {
+  height: 100px;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.emptycartCard {
+  background: #ffffff;
+  border-radius: 4px;
+  border: 1px solid #000000;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: stretch;
+  position: relative;
+}
+
+.emptycartCard h2 {
+  color: #000000;
+  text-align: center;
+  font-size: 20px;
+  line-height: 24px;
+  font-weight: 500;
+}
+
+.emptycartCard .description {
+  color: #000000;
+  text-align: center;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+}
+
+.cartItems {
+  width: 100%;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  position: relative;
+}
+
+.cartItems::-webkit-scrollbar {
+  display: none;
+}
+
+.formCustomer {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 4px;
+  border: 1px solid #000000;
+}
+
+.formCustomer .containerForm {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: stretch;
+  position: relative;
+  width: 100%;
+}
+
+.customOptions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.customOptions .header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  align-self: stretch;
+  position: relative;
+}
+
+.customOptions .header .optionLabel {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  color: #000000;
+}
+
+.customOptions .header .optionInstruction {
+  color: #808080;
+  text-align: left;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+}
+
+.customOptions .options {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  flex: 1;
+}
+
+.customOptions .options .option {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+  background: #ffffff;
+  border-radius: 4px;
+  border: 1px solid #000000;
+  padding: 16px;
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  position: relative;
+}
+
+.customOptions .options .option:hover {
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+  transform: translate(-2px, -2px);
+}
+
+.customOptions .options .option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.customOptions .options .option .optionContent {
+  flex: 1;
+  width: 100%;
+  background: #ffffff;
+}
+
+.customOptions .options .option .optionContent .optionTitle {
+  font-size: 15px;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.customOptions .options .option .optionContent .optionDesc {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.customOptions .options .option input[type="radio"]:checked + .optionContent {
+  color: #000000;
+}
+
+.customOptions
+  .options
+  .option
+  input[type="radio"]:checked
+  + .optionContent
+  .optionTitle,
+.customOptions
+  .options
+  .option
+  input[type="radio"]:checked
+  + .optionContent
+  .optionDesc {
+  color: #000000;
+}
+
+.customOptions .options .option:has(input[type="radio"]:checked) {
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+  transform: translate(-2px, -2px);
+}
+
+.summaryCart {
+  background: #ffffff;
+  border-radius: 4px;
+  border: 1px solid #000000;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  align-self: stretch;
+  position: relative;
+}
+
+.subtotalContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  align-self: stretch;
+  position: relative;
+}
+
+.subtotal {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  align-self: stretch;
+  position: relative;
+}
+
+.label {
+  color: #000000;
+  text-align: left;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+}
+
+.value {
+  color: #000000;
+  text-align: left;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+}
+
+.deliveryFee {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  align-self: stretch;
+  position: relative;
+  overflow: hidden;
+}
+
+.totalContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  align-self: stretch;
+  position: relative;
+  overflow: hidden;
+}
+
+.valueBig {
+  color: #000000;
+  text-align: left;
+  font-size: 20px;
+  line-height: 24px;
+  font-weight: 500;
+}
+
+.noteFee {
+  color: #808080;
+  font-size: 14px;
+  line-height: 16px;
+}

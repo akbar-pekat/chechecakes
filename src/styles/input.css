@@ -1,0 +1,62 @@
+.inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  align-self: stretch;
+}
+
+.inputs .header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  align-self: stretch;
+  position: relative;
+}
+
+.inputs .header .label {
+  color: #000000;
+  text-align: left;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+}
+
+.inputs .header .instruksi {
+  color: #808080;
+  text-align: left;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+}
+
+.inputs .textInput {
+  background: #ffffff;
+  border-radius: 4px;
+  border: 1px solid #000000;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: stretch;
+  position: relative;
+
+  color: #000000;
+  text-align: left;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  flex: 1;
+}
+
+.inputs .errorText {
+  color: #dc341e;
+  text-align: left;
+  font-size: 14px;
+  line-height: 16px;
+  font-weight: 400;
+}

@@ -1,0 +1,673 @@
+---
+import Layout from "../layouts/layout.astro";
+import Button from "../components/button.astro";
+import Input from "../components/input.astro";
+
+import "../styles/checkout.css";
+import "../styles/cartCard.css";
+import "../styles/button.css";
+---
+
+<Layout>
+  <div class="container">
+    <div id="emptyCart" class="emptycartCard">
+      <img src="/cart.svg" class="illust" alt="IllustCart">
+      <h2>Keranjangmu masih kosong nih</h2>
+      <div class="description">
+        Yuk, pilih dulu kue favoritmu biar harimu makin manis!
+      </div>
+      <Button href="/">Lihat menu</Button>
+    </div>
+    <div id="cartItems" class="cartItems" style="display: none;">
+      <!-- Cart items will be rendered here -->
+    </div>
+
+    <div id="formCustomer" class="formCustomer">
+      <div class="containerForm">
+        <Input
+          label="Nama lengkap"
+          instruction="Pakai nama lengkap ya, biar mudah pas kirim."
+          placeholder="Ketik nama lengkap"
+          id="namalengkap"
+          type="text"
+        />
+
+        <Input
+          label="Nomor Whatsapp"
+          instruction="Pastikan nomor bisa dihubungi ya."
+          placeholder="08..."
+          id="nomorwa"
+          type="tel"
+        />
+
+        <Input
+          label="Alamat lengkap"
+          instruction="Tulis selengkap mungkin biar nggak nyasar pas kirim."
+          placeholder="Ketik alamat lengkap"
+          id="alamatlengkap"
+          type="text"
+        />
+
+        <div class="customOptions">
+          <div class="header">
+            <div class="optionLabel">Metode bayar</div>
+            <div class="optionInstruction">
+              Pilih cara yang paling nyaman buat kamu ya.
+            </div>
+          </div>
+          <div class="options">
+            <label class="option">
+              <input type="radio" name="payment" value="transfer" checked />
+              <div class="optionContent">
+                <div class="optionTitle">Transfer via Flip</div>
+                <div class="optionDesc">
+                  Bayar lewat Flip, gampang dan cepat!
+                </div>
+              </div>
+            </label>
+
+            <label class="option">
+              <input type="radio" name="payment" value="cash" />
+              <div class="optionContent">
+                <div class="optionTitle">Bayar tunai</div>
+                <div class="optionDesc">
+                  Bayar tunai langsung saat kue sampai, di toko atau alamat
+                  kamu.
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="customOptions">
+          <div class="header">
+            <div class="optionLabel">Metode kirim</div>
+            <div class="optionInstruction">
+              Pilih cara yang paling nyaman buat kamu ya.
+            </div>
+          </div>
+          <div class="options">
+            <label class="option">
+              <input type="radio" name="delivery" value="delivery" checked />
+              <div class="optionContent">
+                <div class="optionTitle">Diantar</div>
+                <div class="optionDesc">
+                  Akan diantar langsung ke alamat kamu.
+                </div>
+              </div>
+            </label>
+
+            <label class="option">
+              <input type="radio" name="delivery" value="takeaway" />
+              <div class="optionContent">
+                <div class="optionTitle">Ambil sendiri</div>
+                <div class="optionDesc">Kue bisa diambil langsung di toko.</div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="summaryCart">
+      <Input
+        label="Kode promo"
+        instruction="Kalo punya kode promo, bisa diisi ya."
+        placeholder="Ketik kode promo"
+        id="kodepromo"
+        type="text"
+      />
+      <div class="subtotalContainer">
+        <div class="subtotal">
+          <div class="label">Subtotal</div>
+          <div class="value" id="subtotalValue">Rp60.000</div>
+        </div>
+        <div class="deliveryFee">
+          <div class="label">Ongkir</div>
+          <div class="value" id="deliveryValue">Rp10.000</div>
+        </div>
+        <div class="noteFee">
+          Karena belanja kamu banyak, ongkirnya jadi cuma Rp5.000 aja 🎉
+        </div>
+      </div>
+      <div class="totalContainer">
+        <div class="label">Total</div>
+        <div class="valueBig" id="totalValue">Rp70.000</div>
+      </div>
+      <Button style="block" id="checkoutButton">Lanjutkan</Button>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  interface CartProduct {
+    id: string;
+    name: string;
+    price: string;
+    image: string;
+    quantity: number;
+  }
+
+  interface CustomerData {
+    name: string;
+    phone: string;
+    address: string;
+    paymentMethod: string;
+    deliveryMethod: string;
+    timestamp: string;
+    orderId: string;
+    subtotal: number;
+    deliveryFee: number;
+    total: number;
+  }
+
+  const MAX_QUANTITY = 20;
+
+  function createButton(
+    text: string,
+    className: string = "",
+    disabled: boolean = false
+  ) {
+    const button = document.createElement("button");
+    button.textContent = text;
+    button.className = `button ${className}${disabled ? " disabled" : ""}`;
+    button.disabled = disabled;
+    return button;
+  }
+
+  function updateCart(cart: CartProduct[]) {
+    localStorage.setItem("cart", JSON.stringify(cart));
+    // Trigger custom event untuk update tampilan
+    const event = new CustomEvent("cartUpdated", { detail: cart });
+    window.dispatchEvent(event);
+    // Panggil renderCart langsung
+    renderCart();
+  }
+
+  function addToCart(productId: string) {
+    const cartData = localStorage.getItem("cart");
+    if (!cartData) return;
+
+    const cart: CartProduct[] = JSON.parse(cartData);
+    const productIndex = cart.findIndex((item) => item.id === productId);
+
+    if (productIndex !== -1) {
+      if (cart[productIndex].quantity < MAX_QUANTITY) {
+        cart[productIndex].quantity += 1;
+        updateCart(cart);
+      }
+    }
+  }
+
+  function removeFromCart(productId: string) {
+    const cartData = localStorage.getItem("cart");
+    if (!cartData) return;
+
+    const cart: CartProduct[] = JSON.parse(cartData);
+    const productIndex = cart.findIndex((item) => item.id === productId);
+
+    if (productIndex !== -1) {
+      if (cart[productIndex].quantity > 1) {
+        cart[productIndex].quantity -= 1;
+      } else {
+        cart.splice(productIndex, 1);
+      }
+      updateCart(cart);
+    }
+  }
+
+  function deleteFromCart(productId: string) {
+    const cartData = localStorage.getItem("cart");
+    if (!cartData) return;
+
+    const cart: CartProduct[] = JSON.parse(cartData);
+    const newCart = cart.filter((item) => item.id !== productId);
+    updateCart(newCart);
+  }
+
+  function formatRupiah(amount: number): string {
+    return `Rp${amount.toLocaleString("id-ID")}`;
+  }
+
+  function renderCart() {
+    const cartData = localStorage.getItem("cart");
+    const cartItems = document.getElementById("cartItems");
+    const emptyCart = document.getElementById("emptyCart");
+    const formCustomer = document.getElementById("formCustomer");
+    const summaryCart = document.querySelector(".summaryCart") as HTMLElement;
+
+    if (!cartItems || !emptyCart) return;
+
+    if (!cartData || JSON.parse(cartData).length === 0) {
+      emptyCart.style.display = "flex";
+      cartItems.style.display = "none";
+      if (formCustomer) {
+        formCustomer.style.display = "none";
+      }
+      if (summaryCart) {
+        summaryCart.style.display = "none";
+      }
+      return;
+    }
+
+    const cart: CartProduct[] = JSON.parse(cartData);
+    emptyCart.style.display = "none";
+    cartItems.style.display = "flex";
+    if (formCustomer) {
+      formCustomer.style.display = "flex";
+    }
+    if (summaryCart) {
+      summaryCart.style.display = "flex";
+    }
+
+    // Clear existing items
+    cartItems.innerHTML = "";
+
+    // Calculate total
+    let subtotal = 0;
+    cart.forEach((product: CartProduct) => {
+      subtotal += parseInt(product.price) * product.quantity;
+    });
+
+    const deliveryMethod = (
+      document.querySelector(
+        'input[name="delivery"]:checked'
+      ) as HTMLInputElement
+    )?.value;
+
+    // Logika ongkir berdasarkan subtotal dan metode pengantaran
+    let deliveryFee = 0;
+    const noteFee = document.querySelector(".noteFee");
+
+    if (deliveryMethod === "delivery") {
+      deliveryFee = subtotal >= 60000 ? 5000 : 10000;
+
+      // Terapkan diskon promo hanya jika metode pengantaran adalah delivery
+      const promoInput = document.getElementById(
+        "kodepromo"
+      ) as HTMLInputElement;
+      const promoCode = promoInput.value.toUpperCase();
+      if (promoCode in promoCodes) {
+        deliveryFee = Math.max(0, deliveryFee - promoCodes[promoCode]);
+      }
+
+      if (noteFee) {
+        (noteFee as HTMLElement).style.display =
+          subtotal >= 60000 ? "block" : "none";
+      }
+    } else {
+      if (noteFee) {
+        (noteFee as HTMLElement).style.display = "none";
+      }
+    }
+
+    const total = subtotal + deliveryFee;
+
+    // Update summary values
+    const subtotalValue = document.querySelector(".subtotal .value");
+    const deliveryFeeValue = document.querySelector(".deliveryFee .value");
+    const totalValue = document.querySelector(".totalContainer .valueBig");
+
+    if (subtotalValue) {
+      subtotalValue.textContent = formatRupiah(subtotal);
+    }
+    if (deliveryFeeValue) {
+      deliveryFeeValue.textContent = formatRupiah(deliveryFee);
+    }
+    if (totalValue) {
+      totalValue.textContent = formatRupiah(total);
+    }
+
+    // Render each cart item
+    cart.forEach((product: CartProduct) => {
+      const cardCart = document.createElement("div");
+      cardCart.className = "cardCart";
+      cardCart.id = product.id;
+
+      cardCart.innerHTML = `
+        <div class="thumbnail" style="background-image: url('${product.image}')">
+          <div class="price">Rp${product.price}</div>
+        </div>
+        <div class="content">
+          <div class="data">
+            <div class="title">
+              ${product.name}
+              <span class="qty">x${product.quantity}</span>
+            </div>
+          </div>
+          <div class="action">
+            <div class="spacer"></div>
+          </div>
+        </div>
+      `;
+
+      // Add buttons using DOM manipulation
+      const actionDiv = cardCart.querySelector(".action");
+      if (actionDiv) {
+        const kurangiBtn = createButton("Kurangi", "link");
+        const tambahinBtn = createButton(
+          "Tambahin",
+          "link",
+          product.quantity >= MAX_QUANTITY
+        );
+        const hapusBtn = createButton("Hapus", "link");
+
+        // Add event listeners
+        kurangiBtn.addEventListener("click", () => removeFromCart(product.id));
+        tambahinBtn.addEventListener("click", () => addToCart(product.id));
+        hapusBtn.addEventListener("click", () => deleteFromCart(product.id));
+
+        actionDiv.insertBefore(kurangiBtn, actionDiv.firstChild);
+        actionDiv.insertBefore(tambahinBtn, actionDiv.firstChild);
+        actionDiv.appendChild(hapusBtn);
+      }
+
+      cartItems.appendChild(cardCart);
+    });
+  }
+
+  function generateOrderId(name: string): string {
+    const date = new Date();
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear().toString().slice(-2);
+    const nameCustomer = name.replace(/\s+/g, "").toUpperCase();
+    return `${nameCustomer}${day}${month}${year}`;
+  }
+
+  function formatTimestamp(): string {
+    const date = new Date();
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear().toString().slice(-2);
+    return `${hours}${minutes}${day}${month}${year}`;
+  }
+
+  function calculateTotal(): {
+    subtotal: number;
+    deliveryFee: number;
+    total: number;
+  } {
+    const cartData = localStorage.getItem("cart");
+    let subtotal = 0;
+    let deliveryFee = 0;
+
+    if (cartData) {
+      const cart: CartProduct[] = JSON.parse(cartData);
+      cart.forEach((product: CartProduct) => {
+        subtotal += parseInt(product.price) * product.quantity;
+      });
+    }
+
+    const deliveryMethod = (
+      document.querySelector(
+        'input[name="delivery"]:checked'
+      ) as HTMLInputElement
+    )?.value;
+
+    const noteFee = document.querySelector(".noteFee");
+
+    // Logika ongkir berdasarkan subtotal dan metode pengantaran
+    if (deliveryMethod === "takeaway") {
+      deliveryFee = 0;
+      if (noteFee) {
+        (noteFee as HTMLElement).style.display = "none";
+      }
+    } else {
+      deliveryFee = subtotal >= 60000 ? 5000 : 10000;
+      if (noteFee) {
+        (noteFee as HTMLElement).style.display =
+          subtotal >= 60000 ? "block" : "none";
+      }
+    }
+
+    const total = subtotal + deliveryFee;
+
+    return { subtotal, deliveryFee, total };
+  }
+
+  function saveCustomerData() {
+    const name = window.getInputValue("namalengkap");
+    const { subtotal, deliveryFee, total } = calculateTotal();
+
+    const customerData: CustomerData = {
+      name: name,
+      phone: window.getInputValue("nomorwa"),
+      address: window.getInputValue("alamatlengkap"),
+      paymentMethod:
+        (
+          document.querySelector(
+            'input[name="payment"]:checked'
+          ) as HTMLInputElement
+        )?.value || "transfer",
+      deliveryMethod:
+        (
+          document.querySelector(
+            'input[name="delivery"]:checked'
+          ) as HTMLInputElement
+        )?.value || "delivery",
+      timestamp: formatTimestamp(),
+      orderId: generateOrderId(name),
+      subtotal: subtotal,
+      deliveryFee: deliveryFee,
+      total: total,
+    };
+
+    localStorage.setItem("customerData", JSON.stringify(customerData));
+    return customerData;
+  }
+
+  // Fungsi untuk validasi form
+  function validateForm(): boolean {
+    if (!window.validateAllInputs()) {
+      return false;
+    }
+
+    const cartData = localStorage.getItem("cart");
+    if (!cartData || JSON.parse(cartData).length === 0) {
+      alert("Keranjang masih kosong!");
+      return false;
+    }
+
+    // Validasi alamat jika metode pengantaran adalah delivery
+    const deliveryMethod = (
+      document.querySelector(
+        'input[name="delivery"]:checked'
+      ) as HTMLInputElement
+    )?.value;
+
+    if (deliveryMethod === "delivery") {
+      const address = window.getInputValue("alamatlengkap");
+      if (address.length < 10) {
+        alert("Alamat harus diisi dengan lengkap untuk pengantaran!");
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  // Fungsi untuk handle checkout
+  function handleCheckout() {
+    if (!validateForm()) {
+      return;
+    }
+
+    const customerData = saveCustomerData();
+
+    // Redirect berdasarkan metode pembayaran
+    if (customerData.paymentMethod === "transfer") {
+      window.location.href = "/payment/transfer";
+    } else {
+      window.location.href = "/payment/cod";
+    }
+  }
+
+  // Event listener untuk tombol checkout
+  const checkoutButton = document.getElementById("checkoutButton");
+
+  if (checkoutButton) {
+    checkoutButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      handleCheckout();
+    });
+  } else {
+    console.error("Checkout button not found!");
+  }
+
+  // Event listener untuk perubahan di localStorage
+  window.addEventListener("storage", (e) => {
+    if (e.key === "cart") {
+      renderCart();
+    }
+  });
+
+  // Event listener untuk perubahan di tab yang sama
+  window.addEventListener("cartUpdated", () => {
+    renderCart();
+  });
+
+  // Event listener untuk perubahan metode pengantaran
+  document.querySelectorAll('input[name="delivery"]').forEach((radio) => {
+    radio.addEventListener("change", (e) => {
+      const deliveryMethod = (e.target as HTMLInputElement).value;
+      const addressInput = document.getElementById(
+        "alamatlengkap"
+      ) as HTMLInputElement;
+      const errorText = addressInput.parentElement?.querySelector(
+        ".errorText"
+      ) as HTMLElement;
+      const deliveryFeeValue = document.querySelector(".deliveryFee .value");
+      const totalValue = document.querySelector(".totalContainer .valueBig");
+
+      if (deliveryMethod === "takeaway") {
+        addressInput.value = "Ambil di toko";
+        addressInput.disabled = true;
+        if (errorText) {
+          errorText.style.display = "none";
+        }
+        if (deliveryFeeValue) {
+          deliveryFeeValue.textContent = "Gratis";
+        }
+        // Recalculate total without delivery fee
+        const cartData = localStorage.getItem("cart");
+        if (cartData) {
+          const cart: CartProduct[] = JSON.parse(cartData);
+          let subtotal = 0;
+          cart.forEach((product: CartProduct) => {
+            subtotal += parseInt(product.price) * product.quantity;
+          });
+          if (totalValue) {
+            totalValue.textContent = formatRupiah(subtotal);
+          }
+        }
+      } else {
+        addressInput.value = "";
+        addressInput.disabled = false;
+        if (deliveryFeeValue) {
+          deliveryFeeValue.textContent = formatRupiah(10000);
+        }
+        // Recalculate total with delivery fee
+        const cartData = localStorage.getItem("cart");
+        if (cartData) {
+          const cart: CartProduct[] = JSON.parse(cartData);
+          let subtotal = 0;
+          cart.forEach((product: CartProduct) => {
+            subtotal += parseInt(product.price) * product.quantity;
+          });
+          if (totalValue) {
+            totalValue.textContent = formatRupiah(subtotal + 10000);
+          }
+        }
+      }
+    });
+  });
+
+  // Load data saat halaman dimuat
+  document.addEventListener("DOMContentLoaded", () => {
+    renderCart();
+  });
+
+  // Definisi kode promo dan diskonnya
+  const promoCodes: Record<string, number> = {
+    // GRATISONGKIR: 10000, // Diskon ongkir 10rb
+    // HEMAT5K: 5000, // Diskon ongkir 5rb
+    CHC5Z8K2: 5000,
+    CHE5XN1L: 5000,
+    CAKE5TQ29: 5000,
+    ONG5WK3X: 5000,
+
+    CHC10R7LQ: 10000,
+    CHE10VP82: 10000,
+    CAKE10KS5Z: 10000,
+    ONG10JR4C: 10000,
+  };
+
+  // Hitung total dan update tampilan
+  function updateTotals() {
+    const cartData = localStorage.getItem("cart");
+    let subtotal = 0;
+
+    if (cartData) {
+      const cart: CartProduct[] = JSON.parse(cartData);
+      cart.forEach((product: CartProduct) => {
+        subtotal += parseInt(product.price) * product.quantity;
+      });
+    }
+
+    const promoInput = document.getElementById("kodepromo") as HTMLInputElement;
+    const promoCode = promoInput.value.toUpperCase();
+
+    // Cek metode pengantaran
+    const deliveryMethod = (
+      document.querySelector(
+        'input[name="delivery"]:checked'
+      ) as HTMLInputElement
+    )?.value;
+
+    // Hitung ongkir dasar
+    let deliveryFee = 0;
+    const noteFee = document.querySelector(".noteFee");
+
+    if (deliveryMethod === "delivery") {
+      deliveryFee = subtotal >= 60000 ? 5000 : 10000;
+
+      // Terapkan diskon promo hanya jika metode pengantaran adalah delivery
+      if (promoCode in promoCodes) {
+        deliveryFee = Math.max(0, deliveryFee - promoCodes[promoCode]);
+      }
+
+      if (noteFee) {
+        (noteFee as HTMLElement).style.display =
+          subtotal >= 60000 ? "block" : "none";
+      }
+    } else {
+      if (noteFee) {
+        (noteFee as HTMLElement).style.display = "none";
+      }
+    }
+
+    const total = subtotal + deliveryFee;
+
+    // Update tampilan
+    const subtotalElement = document.getElementById("subtotalValue");
+    const deliveryElement = document.getElementById("deliveryValue");
+    const totalElement = document.getElementById("totalValue");
+
+    if (subtotalElement && deliveryElement && totalElement) {
+      subtotalElement.textContent = formatRupiah(subtotal);
+      deliveryElement.textContent =
+        deliveryMethod === "takeaway" ? "Gratis" : formatRupiah(deliveryFee);
+      totalElement.textContent = formatRupiah(total);
+    }
+  }
+
+  // Tambahkan event listener untuk input kode promo
+  const promoInput = document.getElementById("kodepromo") as HTMLInputElement;
+  promoInput.addEventListener("input", updateTotals);
+
+  // Update totals saat halaman dimuat
+  document.addEventListener("DOMContentLoaded", updateTotals);
+</script>

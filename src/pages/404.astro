@@ -1,0 +1,89 @@
+---
+import Layout from "../layouts/layout.astro";
+import Button from "../components/button.astro";
+---
+
+<Layout>
+  <div class="container">
+    <div class="finishCard" id="finishCardSuccess">
+      <img src="/404.svg" class="illust" alt="IllustCart" />
+      <h2>Hmm... halaman yang kamu cari gak ada nih 😢</h2>
+      <div class="description">
+        Sepertinya kamu nyasar ke halaman yang nggak ada, yuk balik ke menu
+        dulu~
+      </div>
+      <Button href="/">Kembali ke beranda</Button>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .container {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    align-items: flex-start;
+    justify-content: flex-start;
+    align-self: stretch;
+    flex: 1;
+    position: relative;
+    overflow-y: scroll;
+  }
+
+  .container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .illust {
+    height: 100px;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
+  .finishCard {
+    background: #ffffff;
+    border-radius: 4px;
+    border: 1px solid #000000;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    justify-content: flex-start;
+    align-self: stretch;
+    position: relative;
+  }
+
+  .finishCard h2 {
+    color: #000000;
+    text-align: center;
+    font-size: 20px;
+    line-height: 24px;
+    font-weight: 500;
+  }
+
+  .finishCard .description {
+    color: #000000;
+    text-align: center;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 400;
+  }
+
+  .buttonGroup {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .smallNote {
+    color: #808080;
+    text-align: center;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 400;
+    position: relative;
+    align-self: stretch;
+  }
+</style>

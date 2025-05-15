@@ -1,0 +1,49 @@
+---
+export interface Props {
+  title?: string;
+}
+
+const {
+  title = "Cheche Cakes Web Order | Ahlinya Donat Kentang & Brownies Panggang",
+} = Astro.props;
+
+import "../styles/layout.css";
+import "@fontsource/instrument-sans";
+import "@fontsource/instrument-sans/400.css";
+import "@fontsource/instrument-sans/500.css";
+import "@fontsource/instrument-sans/600.css";
+import "@fontsource/instrument-sans/700.css";
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+    <meta name="theme-color" content="#351500" />
+    <meta name="generator" content={Astro.generator} />
+    <!-- Icons -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css"
+    />
+  </head>
+  <body>
+    <main>
+      <nav>
+        <a href="/">
+          <img src="/logo.png" alt="Cheche Cakes Logo" />
+        </a>
+      </nav>
+      <slot />
+    </main>
+  </body>
+</html>
