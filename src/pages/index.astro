@@ -251,22 +251,22 @@ const categories = [
   });
 
   // Call updateButtonStates when the page is loaded
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
     updateCartBadge();
     updateButtonStates();
+    
+    // Import dan inisialisasi intro.js secara dinamis
+    const introJs = (await import("intro.js")).default;
+    await import("intro.js/minified/introjs.min.css");
+    
+    introJs()
+      .setOptions({
+        prevLabel: "Kembali",
+        nextLabel: "Lanjut",
+        doneLabel: "Oke, paham",
+        dontShowAgain: true,
+        dontShowAgainLabel: "Jangan tampilkan lagi",
+      })
+      .start();
   });
-
-  // Import dan inisialisasi intro.js
-  import introJs from "intro.js";
-  import "intro.js/minified/introjs.min.css";
-
-  introJs()
-    .setOptions({
-      prevLabel: "Kembali",
-      nextLabel: "Lanjut",
-      doneLabel: "Oke, paham",
-      dontShowAgain: true,
-      dontShowAgainLabel: "Jangan tampilkan lagi",
-    })
-    .start();
 </script>

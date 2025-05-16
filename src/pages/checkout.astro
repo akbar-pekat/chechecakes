@@ -11,7 +11,7 @@ import "../styles/button.css";
 <Layout>
   <div class="container">
     <div id="emptyCart" class="emptycartCard">
-      <img src="/cart.svg" class="illust" alt="IllustCart">
+      <img src="/cart.svg" class="illust" alt="IllustCart" />
       <h2>Keranjangmu masih kosong nih</h2>
       <div class="description">
         Yuk, pilih dulu kue favoritmu biar harimu makin manis!
@@ -461,8 +461,35 @@ import "../styles/button.css";
 
   // Fungsi untuk validasi form
   function validateForm(): boolean {
-    if (!window.validateAllInputs()) {
-      return false;
+    const inputs = [
+      { id: "namalengkap", label: "Nama lengkap" },
+      { id: "nomorwa", label: "Nomor Whatsapp" },
+      { id: "alamatlengkap", label: "Alamat lengkap" },
+    ];
+
+    let isValid = true;
+    let firstInvalidInput = null;
+
+    for (const input of inputs) {
+      const inputElement = document.getElementById(
+        input.id
+      ) as HTMLInputElement;
+      const value = window.getInputValue(input.id);
+
+      if (!value) {
+        isValid = false;
+        if (!firstInvalidInput) {
+          firstInvalidInput = inputElement;
+        }
+        // Tampilkan pesan error
+        const errorText = inputElement.parentElement?.querySelector(
+          ".errorText"
+        ) as HTMLElement;
+        if (errorText) {
+          errorText.textContent = `${input.label} harus diisi`;
+          errorText.style.display = "block";
+        }
+      }
     }
 
     const cartData = localStorage.getItem("cart");
@@ -481,16 +508,35 @@ import "../styles/button.css";
     if (deliveryMethod === "delivery") {
       const address = window.getInputValue("alamatlengkap");
       if (address.length < 10) {
-        alert("Alamat harus diisi dengan lengkap untuk pengantaran!");
-        return false;
+        const addressInput = document.getElementById(
+          "alamatlengkap"
+        ) as HTMLInputElement;
+        const errorText = addressInput.parentElement?.querySelector(
+          ".errorText"
+        ) as HTMLElement;
+        if (errorText) {
+          errorText.textContent =
+            "Alamat harus diisi dengan lengkap untuk pengantaran!";
+          errorText.style.display = "block";
+        }
+        if (!firstInvalidInput) {
+          firstInvalidInput = addressInput;
+        }
+        isValid = false;
       }
     }
 
-    return true;
+    if (!isValid && firstInvalidInput) {
+      // Scroll ke input yang belum terisi
+      firstInvalidInput.scrollIntoView({ behavior: "smooth", block: "center" });
+      firstInvalidInput.focus();
+    }
+
+    return isValid;
   }
 
   // Fungsi untuk handle checkout
-  function handleCheckout() {
+  async function handleCheckout() {
     if (!validateForm()) {
       return;
     }
@@ -499,7 +545,65 @@ import "../styles/button.css";
 
     // Redirect berdasarkan metode pembayaran
     if (customerData.paymentMethod === "transfer") {
-      window.location.href = "/payment/transfer";
+      try {
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
+        myHeaders.append("Accept", "application/json");
+        myHeaders.append(
+          "Authorization",
+          "Basic SkRKNUpERXpKRTQwUW5oSlZYVkxXRmhNTURaeE5HOWlNV1p6WVhWNlFXTnhaRzVPYkRCUFdWVlJWMUJWTDJsbGVqbGpZV2N5TmpWNmJDNVQ6"
+        );
+
+        const urlencoded = new URLSearchParams();
+        urlencoded.append("title", `Pembayaran ${customerData.orderId}`);
+        urlencoded.append("type", "SINGLE");
+        urlencoded.append("amount", customerData.total.toString());
+        urlencoded.append(
+          "redirect_url",
+          `https://chechecakes.biz.id/payment/tf`
+        );
+        urlencoded.append("is_address_required", "1");
+        urlencoded.append("is_phone_number_required", "1");
+        urlencoded.append("step", "2");
+        urlencoded.append("sender_name", customerData.name);
+        urlencoded.append("sender_email", "customer@chechecakes.biz.id");
+        urlencoded.append("sender_phone_number", customerData.phone);
+        urlencoded.append("sender_address", customerData.address);
+
+        const requestOptions: RequestInit = {
+          method: "POST",
+          headers: myHeaders,
+          body: urlencoded,
+          redirect: "follow",
+        };
+
+        const response = await fetch(
+          "https://bigflip.id/big_sandbox_api/v2/pwf/bill",
+          requestOptions
+        );
+        const result = await response.json();
+
+        // Simpan hanya link_id dan link_url ke localStorage
+        const flipData = {
+          link_id: result.link_id,
+          link_url: result.link_url,
+        };
+        localStorage.setItem("flipResponse", JSON.stringify(flipData));
+
+        console.log(result.link_url);
+        let url = result.link_url;
+        if (!/^https?:\/\//i.test(url)) {
+          url = "https://" + url;
+        }
+
+        // Redirect ke halaman pembayaran dengan URL Flip yang benar
+        window.location.href = url;
+      } catch (error) {
+        console.error("Error:", error);
+        alert(
+          "Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi."
+        );
+      }
     } else {
       window.location.href = "/payment/cod";
     }
@@ -509,9 +613,9 @@ import "../styles/button.css";
   const checkoutButton = document.getElementById("checkoutButton");
 
   if (checkoutButton) {
-    checkoutButton.addEventListener("click", (e) => {
+    checkoutButton.addEventListener("click", async (e) => {
       e.preventDefault();
-      handleCheckout();
+      await handleCheckout();
     });
   } else {
     console.error("Checkout button not found!");
