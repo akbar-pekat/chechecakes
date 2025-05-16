@@ -6,11 +6,11 @@ const { product } = Astro.props;
 ---
 
 <div class="productCard">
-  <div class="thumbnail" style={`background: url(${product.image});`}>
+  <div class="thumbnail" style={`background: url(${product.image}) center; background-size: cover;   background-repeat: no-repeat;`}>
     {
       product.stock && (
         <div class="ribbon">
-          <div class="stock">Sisa {product.stock}</div>
+          <div class="stock">Isi {product.stock}pcs</div>
         </div>
       )
     }
