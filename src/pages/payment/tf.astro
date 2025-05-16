@@ -1,0 +1,305 @@
+---
+import Layout from "../../layouts/layout.astro";
+import Button from "../../components/button.astro";
+---
+
+<Layout>
+  <div class="container">
+    <div class="finishCard" id="finishCardCheck">
+      <img src="/check.svg" class="illust" alt="IllustCart" />
+      <h2>Lagi dicek dulu yaa...</h2>
+      <div class="description">
+        Tunggu bentar, kita lagi ngecek status pembayarannya nih. Jangan tutup
+        halaman ini dulu ya 🍃
+      </div>
+    </div>
+
+    <div class="finishCard" id="finishCardSuccess">
+      <img src="/done.svg" class="illust" alt="IllustCart" />
+      <h2>Tinggal satu langkah lagi~</h2>
+      <div class="description">
+        Makasih ya udah pesen di Cheche Cakes 💖, sekarang tinggal kirim pesanan
+        ini ke WhatsApp admin biar cepet diproses.
+      </div>
+      <div class="buttonGroup">
+        <Button style="outline">Kembali ke beranda</Button>
+        <Button id="whatsappButton">Kirim ke WhatsApp</Button>
+      </div>
+      <div class="smallNote">
+        Jangan utak-atik pesan WA-nya.
+        <br />
+        Langsung kirim aja ya biar admin bisa proses cepat 🙌
+      </div>
+    </div>
+
+    <div class="finishCard" id="finishCardFailed">
+      <img src="/fail.svg" class="illust" alt="IllustCart" />
+      <h2>Hmm... kayaknya belum berhasil nih</h2>
+      <div class="description">
+        Kita belum dapet konfirmasi dari pembayaran kamu. Udah bayar? Coba
+        tunggu sebentar terus refresh aja.
+      </div>
+      <Button>Refresh Halaman</Button>
+      <div class="description">
+        Kita belum dapet konfirmasi dari pembayaran kamu. Udah bayar? Coba
+        tunggu sebentar terus refresh aja.
+      </div>
+      <Button>Balik ke Flip</Button>
+    </div>
+
+    <div class="finishCard" id="finishCardEmpty">
+      <img src="/cart.svg" class="illust" alt="IllustCart" />
+      <h2>Oops, pesanan kamu belum ada nih!</h2>
+      <div class="description">
+        Kayaknya kamu belum pesan, yuk balik ke menu buat pilih favoritmu dulu!
+      </div>
+      <div class="buttonGroup">
+        <Button href="/">Lihat menu</Button>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  let hasClickedWhatsApp = false;
+
+  // Fungsi untuk menampilkan card berdasarkan status
+  function showCard(cardId: string) {
+    const cards = document.querySelectorAll(".finishCard");
+    cards.forEach((card) => {
+      (card as HTMLElement).style.display = "none";
+    });
+    const selectedCard = document.getElementById(cardId);
+    if (selectedCard) {
+      selectedCard.style.display = "flex";
+    }
+  }
+
+  // Fungsi untuk mengecek status pembayaran
+  async function checkPaymentStatus() {
+    try {
+      // Ambil link_id dari localStorage
+      const flipData = JSON.parse(localStorage.getItem("flipResponse") || "{}");
+      if (!flipData.link_id) {
+        showCard("finishCardFailed");
+        return;
+      }
+
+      const myHeaders = new Headers();
+      myHeaders.append("Accept", "application/json");
+      myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
+      myHeaders.append(
+        "Authorization",
+        "Basic SkRKNUpERXpKRTQwUW5oSlZYVkxXRmhNTURaeE5HOWlNV1p6WVhWNlFXTnhaRzVPYkRCUFdWVlJWMUJWTDJsbGVqbGpZV2N5TmpWNmJDNVQ6"
+      );
+
+      const requestOptions: RequestInit = {
+        method: "GET",
+        headers: myHeaders,
+        redirect: "follow",
+      };
+
+      const response = await fetch(
+        `https://bigflip.id/big_sandbox_api/v2/pwf/${flipData.link_id}/payment`,
+        requestOptions
+      );
+      console.log(flipData.link_id);
+      const result = await response.json();
+      console.log(result);
+
+      // Cek status pembayaran dari data array
+      if (result.data && result.data.length > 0) {
+        const paymentData = result.data[0];
+
+        if (paymentData.status === "SUCCESSFUL") {
+          showCard("finishCardSuccess");
+        } else {
+          showCard("finishCardFailed");
+        }
+      } else {
+        showCard("finishCardFailed");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      showCard("finishCardFailed");
+    }
+  }
+
+  // Fungsi untuk mengirim pesan ke WhatsApp
+  function sendToWhatsApp() {
+    const cartData = localStorage.getItem("cart");
+    const customerData = localStorage.getItem("customerData");
+
+    function formatWhatsAppMessage() {
+      const cart = JSON.parse(cartData || "[]");
+      const customer = JSON.parse(customerData || "{}");
+
+      let message = `*PESANAN BARU*\n\n`;
+      message += `*Detail Pelanggan:*\n`;
+      message += `Nama: ${customer.name}\n`;
+      message += `No. WA: ${customer.phone}\n`;
+      message += `Alamat: ${customer.address}\n`;
+      message += `Metode Bayar: ${customer.paymentMethod === "transfer" ? "Transfer" : "Bayar Tunai"}\n`;
+      message += `Metode Kirim: ${customer.deliveryMethod === "delivery" ? "Diantar" : "Ambil Sendiri"}\n\n`;
+
+      message += `*Detail Pesanan:*\n`;
+      cart.forEach((item: any, index: number) => {
+        message += `${index + 1}. ${item.name} x${item.quantity} = Rp${(parseInt(item.price) * item.quantity).toLocaleString("id-ID")}\n`;
+      });
+
+      message += `\n*Ringkasan Pembayaran:*\n`;
+      message += `Subtotal: Rp${customer.subtotal.toLocaleString("id-ID")}\n`;
+      message += `Ongkir: Rp${customer.deliveryFee.toLocaleString("id-ID")}\n`;
+      message += `Total: Rp${customer.total.toLocaleString("id-ID")}\n\n`;
+
+      message += `ID Pesanan: ${customer.orderId}`;
+
+      return encodeURIComponent(message);
+    }
+
+    const message = formatWhatsAppMessage();
+    const whatsappUrl = `https://wa.me/6285156220232?text=${message}`;
+    window.open(whatsappUrl, "_blank");
+    hasClickedWhatsApp = true;
+  }
+
+  // Event listener untuk tombol WhatsApp
+  const whatsappButton = document.getElementById("whatsappButton");
+  if (whatsappButton) {
+    whatsappButton.addEventListener("click", sendToWhatsApp);
+  }
+
+  // Event listener untuk tombol kembali
+  const backButton = document.querySelector(".buttonGroup button:first-child");
+  if (backButton) {
+    backButton.addEventListener("click", (e) => {
+      e.preventDefault(); // Prevent default navigation
+
+      if (!hasClickedWhatsApp) {
+        alert("Jangan lupa kirim pesanan ke WhatsApp admin dulu ya! 🙏");
+        return;
+      }
+
+      localStorage.removeItem("cart");
+      localStorage.removeItem("customerData");
+      localStorage.removeItem("flipResponse");
+      window.location.href = "/";
+    });
+  }
+
+  // Event listener untuk tombol refresh
+  const refreshButton = document.querySelector("#finishCardFailed button");
+  if (refreshButton) {
+    refreshButton.addEventListener("click", () => {
+      window.location.reload();
+    });
+  }
+
+  // Event listener untuk tombol kembali ke Flip
+  const backToFlipButton = document.querySelector(
+    "#finishCardFailed button:last-child"
+  );
+  if (backToFlipButton) {
+    backToFlipButton.addEventListener("click", () => {
+      const flipData = JSON.parse(localStorage.getItem("flipResponse") || "{}");
+      if (flipData.link_url) {
+        window.location.href = flipData.link_url;
+      }
+    });
+  }
+
+  // Cek status pembayaran saat halaman dimuat
+  document.addEventListener("DOMContentLoaded", () => {
+    const finishCardSuccess = document.getElementById("finishCardSuccess");
+    const finishCardEmpty = document.getElementById("finishCardEmpty");
+    const finishCardCheck = document.getElementById("finishCardCheck");
+    const finishCardFailed = document.getElementById("finishCardFailed");
+
+    const cartData = localStorage.getItem("cart");
+    const customerData = localStorage.getItem("customerData");
+
+    if (cartData && customerData) {
+      if (finishCardSuccess) finishCardSuccess.style.display = "none";
+      if (finishCardEmpty) finishCardEmpty.style.display = "none";
+      if (finishCardCheck) finishCardCheck.style.display = "flex";
+      if (finishCardFailed) finishCardFailed.style.display = "none";
+      checkPaymentStatus();
+    } else {
+      if (finishCardSuccess) finishCardSuccess.style.display = "none";
+      if (finishCardEmpty) finishCardEmpty.style.display = "flex";
+      if (finishCardCheck) finishCardCheck.style.display = "none";
+      if (finishCardFailed) finishCardFailed.style.display = "none";
+    }
+  });
+</script>
+
+<style>
+  .container {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    align-items: flex-start;
+    justify-content: flex-start;
+    align-self: stretch;
+    flex: 1;
+    position: relative;
+    overflow-y: scroll;
+  }
+
+  .container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .illust {
+    height: 100px;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
+  .finishCard {
+    background: #ffffff;
+    border-radius: 4px;
+    border: 1px solid #000000;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    justify-content: flex-start;
+    align-self: stretch;
+    position: relative;
+  }
+
+  .finishCard h2 {
+    color: #000000;
+    text-align: center;
+    font-size: 20px;
+    line-height: 24px;
+    font-weight: 500;
+  }
+
+  .finishCard .description {
+    color: #000000;
+    text-align: center;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 400;
+  }
+
+  .buttonGroup {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .smallNote {
+    color: #808080;
+    text-align: center;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 400;
+    position: relative;
+    align-self: stretch;
+  }
+</style>
