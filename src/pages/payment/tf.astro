@@ -61,6 +61,17 @@ import Button from "../../components/button.astro";
 </Layout>
 
 <script type="module">
+  (function () {
+    const hasFlipData =
+      localStorage.getItem("flipResponse") ||
+      localStorage.getItem("flipLinkId") ||
+      localStorage.getItem("flipLinkUrl");
+    if (!hasFlipData) {
+      // replace supaya tidak menambah entry ke history
+      window.location.replace("/payment/cod");
+    }
+  })();
+
   // ------------------------- TRANSFER CONFIRMATION -------------------------
   class TransferConfirmationController {
     static init() {
