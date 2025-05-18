@@ -139,639 +139,384 @@ import "../styles/button.css";
   </div>
 </Layout>
 
-<script>
-  interface CartProduct {
-    id: string;
-    name: string;
-    price: string;
-    image: string;
-    quantity: number;
-  }
-
-  interface CustomerData {
-    name: string;
-    phone: string;
-    address: string;
-    paymentMethod: string;
-    deliveryMethod: string;
-    timestamp: string;
-    orderId: string;
-    subtotal: number;
-    deliveryFee: number;
-    total: number;
-  }
-
-  const MAX_QUANTITY = 20;
-
-  function createButton(
-    text: string,
-    className: string = "",
-    disabled: boolean = false
-  ) {
-    const button = document.createElement("button");
-    button.textContent = text;
-    button.className = `button ${className}${disabled ? " disabled" : ""}`;
-    button.disabled = disabled;
-    return button;
-  }
-
-  function updateCart(cart: CartProduct[]) {
-    localStorage.setItem("cart", JSON.stringify(cart));
-    // Trigger custom event untuk update tampilan
-    const event = new CustomEvent("cartUpdated", { detail: cart });
-    window.dispatchEvent(event);
-    // Panggil renderCart langsung
-    renderCart();
-  }
-
-  function addToCart(productId: string) {
-    const cartData = localStorage.getItem("cart");
-    if (!cartData) return;
-
-    const cart: CartProduct[] = JSON.parse(cartData);
-    const productIndex = cart.findIndex((item) => item.id === productId);
-
-    if (productIndex !== -1) {
-      if (cart[productIndex].quantity < MAX_QUANTITY) {
-        cart[productIndex].quantity += 1;
-        updateCart(cart);
-      }
-    }
-  }
-
-  function removeFromCart(productId: string) {
-    const cartData = localStorage.getItem("cart");
-    if (!cartData) return;
-
-    const cart: CartProduct[] = JSON.parse(cartData);
-    const productIndex = cart.findIndex((item) => item.id === productId);
-
-    if (productIndex !== -1) {
-      if (cart[productIndex].quantity > 1) {
-        cart[productIndex].quantity -= 1;
-      } else {
-        cart.splice(productIndex, 1);
-      }
-      updateCart(cart);
-    }
-  }
-
-  function deleteFromCart(productId: string) {
-    const cartData = localStorage.getItem("cart");
-    if (!cartData) return;
-
-    const cart: CartProduct[] = JSON.parse(cartData);
-    const newCart = cart.filter((item) => item.id !== productId);
-    updateCart(newCart);
-  }
-
-  function formatRupiah(amount: number): string {
-    return `Rp${amount.toLocaleString("id-ID")}`;
-  }
-
-  function renderCart() {
-    const cartData = localStorage.getItem("cart");
-    const cartItems = document.getElementById("cartItems");
-    const emptyCart = document.getElementById("emptyCart");
-    const formCustomer = document.getElementById("formCustomer");
-    const summaryCart = document.querySelector(".summaryCart") as HTMLElement;
-
-    if (!cartItems || !emptyCart) return;
-
-    if (!cartData || JSON.parse(cartData).length === 0) {
-      emptyCart.style.display = "flex";
-      cartItems.style.display = "none";
-      if (formCustomer) {
-        formCustomer.style.display = "none";
-      }
-      if (summaryCart) {
-        summaryCart.style.display = "none";
-      }
-      return;
-    }
-
-    const cart: CartProduct[] = JSON.parse(cartData);
-    emptyCart.style.display = "none";
-    cartItems.style.display = "flex";
-    if (formCustomer) {
-      formCustomer.style.display = "flex";
-    }
-    if (summaryCart) {
-      summaryCart.style.display = "flex";
-    }
-
-    // Clear existing items
-    cartItems.innerHTML = "";
-
-    // Calculate total
-    let subtotal = 0;
-    cart.forEach((product: CartProduct) => {
-      subtotal += parseInt(product.price) * product.quantity;
-    });
-
-    const deliveryMethod = (
-      document.querySelector(
-        'input[name="delivery"]:checked'
-      ) as HTMLInputElement
-    )?.value;
-
-    // Logika ongkir berdasarkan subtotal dan metode pengantaran
-    let deliveryFee = 0;
-    const noteFee = document.querySelector(".noteFee");
-
-    if (deliveryMethod === "delivery") {
-      deliveryFee = subtotal >= 60000 ? 5000 : 10000;
-
-      // Terapkan diskon promo hanya jika metode pengantaran adalah delivery
-      const promoInput = document.getElementById(
-        "kodepromo"
-      ) as HTMLInputElement;
-      const promoCode = promoInput.value.toUpperCase();
-      if (promoCode in promoCodes) {
-        deliveryFee = Math.max(0, deliveryFee - promoCodes[promoCode]);
-      }
-
-      if (noteFee) {
-        (noteFee as HTMLElement).style.display =
-          subtotal >= 60000 ? "block" : "none";
-      }
-    } else {
-      if (noteFee) {
-        (noteFee as HTMLElement).style.display = "none";
-      }
-    }
-
-    const total = subtotal + deliveryFee;
-
-    // Update summary values
-    const subtotalValue = document.querySelector(".subtotal .value");
-    const deliveryFeeValue = document.querySelector(".deliveryFee .value");
-    const totalValue = document.querySelector(".totalContainer .valueBig");
-
-    if (subtotalValue) {
-      subtotalValue.textContent = formatRupiah(subtotal);
-    }
-    if (deliveryFeeValue) {
-      deliveryFeeValue.textContent = formatRupiah(deliveryFee);
-    }
-    if (totalValue) {
-      totalValue.textContent = formatRupiah(total);
-    }
-
-    // Render each cart item
-    cart.forEach((product: CartProduct) => {
-      const cardCart = document.createElement("div");
-      cardCart.className = "cardCart";
-      cardCart.id = product.id;
-
-      cardCart.innerHTML = `
-        <div class="thumbnail" style="background-image: url('${product.image}')">
-          <div class="price">Rp${product.price}</div>
-        </div>
-        <div class="content">
-          <div class="data">
-            <div class="title">
-              ${product.name}
-              <span class="qty">x${product.quantity}</span>
-            </div>
-          </div>
-          <div class="action">
-            <div class="spacer"></div>
-          </div>
-        </div>
-      `;
-
-      // Add buttons using DOM manipulation
-      const actionDiv = cardCart.querySelector(".action");
-      if (actionDiv) {
-        const kurangiBtn = createButton("Kurangi", "link");
-        const tambahinBtn = createButton(
-          "Tambahin",
-          "link",
-          product.quantity >= MAX_QUANTITY
-        );
-        const hapusBtn = createButton("Hapus", "link");
-
-        // Add event listeners
-        kurangiBtn.addEventListener("click", () => removeFromCart(product.id));
-        tambahinBtn.addEventListener("click", () => addToCart(product.id));
-        hapusBtn.addEventListener("click", () => deleteFromCart(product.id));
-
-        actionDiv.insertBefore(kurangiBtn, actionDiv.firstChild);
-        actionDiv.insertBefore(tambahinBtn, actionDiv.firstChild);
-        actionDiv.appendChild(hapusBtn);
-      }
-
-      cartItems.appendChild(cardCart);
-    });
-  }
-
-  function generateOrderId(name: string): string {
-    const date = new Date();
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear().toString().slice(-2);
-    const nameCustomer = name.replace(/\s+/g, "").toUpperCase();
-    return `${nameCustomer}${day}${month}${year}`;
-  }
-
-  function formatTimestamp(): string {
-    const date = new Date();
-    const hours = date.getHours().toString().padStart(2, "0");
-    const minutes = date.getMinutes().toString().padStart(2, "0");
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear().toString().slice(-2);
-    return `${hours}${minutes}${day}${month}${year}`;
-  }
-
-  function calculateTotal(): {
-    subtotal: number;
-    deliveryFee: number;
-    total: number;
-  } {
-    const cartData = localStorage.getItem("cart");
-    let subtotal = 0;
-    let deliveryFee = 0;
-
-    if (cartData) {
-      const cart: CartProduct[] = JSON.parse(cartData);
-      cart.forEach((product: CartProduct) => {
-        subtotal += parseInt(product.price) * product.quantity;
-      });
-    }
-
-    const deliveryMethod = (
-      document.querySelector(
-        'input[name="delivery"]:checked'
-      ) as HTMLInputElement
-    )?.value;
-
-    const noteFee = document.querySelector(".noteFee");
-
-    // Logika ongkir berdasarkan subtotal dan metode pengantaran
-    if (deliveryMethod === "takeaway") {
-      deliveryFee = 0;
-      if (noteFee) {
-        (noteFee as HTMLElement).style.display = "none";
-      }
-    } else {
-      deliveryFee = subtotal >= 60000 ? 5000 : 10000;
-      if (noteFee) {
-        (noteFee as HTMLElement).style.display =
-          subtotal >= 60000 ? "block" : "none";
-      }
-    }
-
-    const total = subtotal + deliveryFee;
-
-    return { subtotal, deliveryFee, total };
-  }
-
-  function saveCustomerData() {
-    const name = window.getInputValue("namalengkap");
-    const { subtotal, deliveryFee, total } = calculateTotal();
-
-    const customerData: CustomerData = {
-      name: name,
-      phone: window.getInputValue("nomorwa"),
-      address: window.getInputValue("alamatlengkap"),
-      paymentMethod:
-        (
-          document.querySelector(
-            'input[name="payment"]:checked'
-          ) as HTMLInputElement
-        )?.value || "transfer",
-      deliveryMethod:
-        (
-          document.querySelector(
-            'input[name="delivery"]:checked'
-          ) as HTMLInputElement
-        )?.value || "delivery",
-      timestamp: formatTimestamp(),
-      orderId: generateOrderId(name),
-      subtotal: subtotal,
-      deliveryFee: deliveryFee,
-      total: total,
-    };
-
-    localStorage.setItem("customerData", JSON.stringify(customerData));
-    return customerData;
-  }
-
-  // Fungsi untuk validasi form
-  function validateForm(): boolean {
-    const inputs = [
-      { id: "namalengkap", label: "Nama lengkap" },
-      { id: "nomorwa", label: "Nomor Whatsapp" },
-      { id: "alamatlengkap", label: "Alamat lengkap" },
-    ];
-
-    let isValid = true;
-    let firstInvalidInput = null;
-
-    for (const input of inputs) {
-      const inputElement = document.getElementById(
-        input.id
-      ) as HTMLInputElement;
-      const value = window.getInputValue(input.id);
-
-      if (!value) {
-        isValid = false;
-        if (!firstInvalidInput) {
-          firstInvalidInput = inputElement;
-        }
-        // Tampilkan pesan error
-        const errorText = inputElement.parentElement?.querySelector(
-          ".errorText"
-        ) as HTMLElement;
-        if (errorText) {
-          errorText.textContent = `${input.label} harus diisi`;
-          errorText.style.display = "block";
-        }
-      }
-    }
-
-    const cartData = localStorage.getItem("cart");
-    if (!cartData || JSON.parse(cartData).length === 0) {
-      alert("Keranjang masih kosong!");
-      return false;
-    }
-
-    // Validasi alamat jika metode pengantaran adalah delivery
-    const deliveryMethod = (
-      document.querySelector(
-        'input[name="delivery"]:checked'
-      ) as HTMLInputElement
-    )?.value;
-
-    if (deliveryMethod === "delivery") {
-      const address = window.getInputValue("alamatlengkap");
-      if (address.length < 10) {
-        const addressInput = document.getElementById(
-          "alamatlengkap"
-        ) as HTMLInputElement;
-        const errorText = addressInput.parentElement?.querySelector(
-          ".errorText"
-        ) as HTMLElement;
-        if (errorText) {
-          errorText.textContent =
-            "Alamat harus diisi dengan lengkap untuk pengantaran!";
-          errorText.style.display = "block";
-        }
-        if (!firstInvalidInput) {
-          firstInvalidInput = addressInput;
-        }
-        isValid = false;
-      }
-    }
-
-    if (!isValid && firstInvalidInput) {
-      // Scroll ke input yang belum terisi
-      firstInvalidInput.scrollIntoView({ behavior: "smooth", block: "center" });
-      firstInvalidInput.focus();
-    }
-
-    return isValid;
-  }
-
-  // Fungsi untuk handle checkout
-  async function handleCheckout() {
-    if (!validateForm()) {
-      return;
-    }
-
-    const customerData = saveCustomerData();
-
-    // Redirect berdasarkan metode pembayaran
-    if (customerData.paymentMethod === "transfer") {
-      try {
-        const myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
-        myHeaders.append("Accept", "application/json");
-        myHeaders.append(
-          "Authorization",
-          "Basic SkRKNUpERXpKRTQwUW5oSlZYVkxXRmhNTURaeE5HOWlNV1p6WVhWNlFXTnhaRzVPYkRCUFdWVlJWMUJWTDJsbGVqbGpZV2N5TmpWNmJDNVQ6"
-        );
-
-        const urlencoded = new URLSearchParams();
-        urlencoded.append("title", `Pembayaran ${customerData.orderId}`);
-        urlencoded.append("type", "SINGLE");
-        urlencoded.append("amount", customerData.total.toString());
-        urlencoded.append(
-          "redirect_url",
-          `https://chechecakes.biz.id/payment/tf`
-        );
-        urlencoded.append("is_address_required", "1");
-        urlencoded.append("is_phone_number_required", "1");
-        urlencoded.append("step", "2");
-        urlencoded.append("sender_name", customerData.name);
-        urlencoded.append("sender_email", "customer@chechecakes.biz.id");
-        urlencoded.append("sender_phone_number", customerData.phone);
-        urlencoded.append("sender_address", customerData.address);
-
-        const requestOptions: RequestInit = {
-          method: "POST",
-          headers: myHeaders,
-          body: urlencoded,
-          redirect: "follow",
-        };
-
-        const response = await fetch(
-          "https://bigflip.id/big_sandbox_api/v2/pwf/bill",
-          requestOptions
-        );
-        const result = await response.json();
-
-        // Simpan hanya link_id dan link_url ke localStorage
-        const flipData = {
-          link_id: result.link_id,
-          link_url: result.link_url,
-        };
-        localStorage.setItem("flipResponse", JSON.stringify(flipData));
-
-        console.log(result.link_url);
-        let url = result.link_url;
-        if (!/^https?:\/\//i.test(url)) {
-          url = "https://" + url;
-        }
-
-        // Redirect ke halaman pembayaran dengan URL Flip yang benar
-        window.location.href = url;
-      } catch (error) {
-        console.error("Error:", error);
-        alert(
-          "Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi."
-        );
-      }
-    } else {
-      window.location.href = "/payment/cod";
-    }
-  }
-
-  // Event listener untuk tombol checkout
-  const checkoutButton = document.getElementById("checkoutButton");
-
-  if (checkoutButton) {
-    checkoutButton.addEventListener("click", async (e) => {
-      e.preventDefault();
-      await handleCheckout();
-    });
-  } else {
-    console.error("Checkout button not found!");
-  }
-
-  // Event listener untuk perubahan di localStorage
-  window.addEventListener("storage", (e) => {
-    if (e.key === "cart") {
-      renderCart();
-    }
-  });
-
-  // Event listener untuk perubahan di tab yang sama
-  window.addEventListener("cartUpdated", () => {
-    renderCart();
-  });
-
-  // Event listener untuk perubahan metode pengantaran
-  document.querySelectorAll('input[name="delivery"]').forEach((radio) => {
-    radio.addEventListener("change", (e) => {
-      const deliveryMethod = (e.target as HTMLInputElement).value;
-      const addressInput = document.getElementById(
-        "alamatlengkap"
-      ) as HTMLInputElement;
-      const errorText = addressInput.parentElement?.querySelector(
-        ".errorText"
-      ) as HTMLElement;
-      const deliveryFeeValue = document.querySelector(".deliveryFee .value");
-      const totalValue = document.querySelector(".totalContainer .valueBig");
-
-      if (deliveryMethod === "takeaway") {
-        addressInput.value = "Ambil di toko";
-        addressInput.disabled = true;
-        if (errorText) {
-          errorText.style.display = "none";
-        }
-        if (deliveryFeeValue) {
-          deliveryFeeValue.textContent = "Gratis";
-        }
-        // Recalculate total without delivery fee
-        const cartData = localStorage.getItem("cart");
-        if (cartData) {
-          const cart: CartProduct[] = JSON.parse(cartData);
-          let subtotal = 0;
-          cart.forEach((product: CartProduct) => {
-            subtotal += parseInt(product.price) * product.quantity;
-          });
-          if (totalValue) {
-            totalValue.textContent = formatRupiah(subtotal);
-          }
-        }
-      } else {
-        addressInput.value = "";
-        addressInput.disabled = false;
-        if (deliveryFeeValue) {
-          deliveryFeeValue.textContent = formatRupiah(10000);
-        }
-        // Recalculate total with delivery fee
-        const cartData = localStorage.getItem("cart");
-        if (cartData) {
-          const cart: CartProduct[] = JSON.parse(cartData);
-          let subtotal = 0;
-          cart.forEach((product: CartProduct) => {
-            subtotal += parseInt(product.price) * product.quantity;
-          });
-          if (totalValue) {
-            totalValue.textContent = formatRupiah(subtotal + 10000);
-          }
-        }
-      }
-    });
-  });
-
-  // Load data saat halaman dimuat
-  document.addEventListener("DOMContentLoaded", () => {
-    renderCart();
-  });
-
-  // Definisi kode promo dan diskonnya
-  const promoCodes: Record<string, number> = {
-    // GRATISONGKIR: 10000, // Diskon ongkir 10rb
-    // HEMAT5K: 5000, // Diskon ongkir 5rb
+<script type="module">
+  // ------------------------- UTIL -------------------------
+  const MAX_QTY = 20;
+  const promoCodes = {
     CHC5Z8K2: 5000,
     CHE5XN1L: 5000,
     CAKE5TQ29: 5000,
     ONG5WK3X: 5000,
-
     CHC10R7LQ: 10000,
     CHE10VP82: 10000,
     CAKE10KS5Z: 10000,
     ONG10JR4C: 10000,
   };
 
-  // Hitung total dan update tampilan
-  function updateTotals() {
-    const cartData = localStorage.getItem("cart");
-    let subtotal = 0;
+  function formatRupiah(amount) {
+    return `Rp${amount.toLocaleString("id-ID")}`;
+  }
 
-    if (cartData) {
-      const cart: CartProduct[] = JSON.parse(cartData);
-      cart.forEach((product: CartProduct) => {
-        subtotal += parseInt(product.price) * product.quantity;
-      });
-    }
+  // ------------------------- CART MANAGER -------------------------
+  class CartManager {
+    static KEY = "cart";
 
-    const promoInput = document.getElementById("kodepromo") as HTMLInputElement;
-    const promoCode = promoInput.value.toUpperCase();
-
-    // Cek metode pengantaran
-    const deliveryMethod = (
-      document.querySelector(
-        'input[name="delivery"]:checked'
-      ) as HTMLInputElement
-    )?.value;
-
-    // Hitung ongkir dasar
-    let deliveryFee = 0;
-    const noteFee = document.querySelector(".noteFee");
-
-    if (deliveryMethod === "delivery") {
-      deliveryFee = subtotal >= 60000 ? 5000 : 10000;
-
-      // Terapkan diskon promo hanya jika metode pengantaran adalah delivery
-      if (promoCode in promoCodes) {
-        deliveryFee = Math.max(0, deliveryFee - promoCodes[promoCode]);
-      }
-
-      if (noteFee) {
-        (noteFee as HTMLElement).style.display =
-          subtotal >= 60000 ? "block" : "none";
-      }
-    } else {
-      if (noteFee) {
-        (noteFee as HTMLElement).style.display = "none";
+    static get() {
+      try {
+        return JSON.parse(localStorage.getItem(this.KEY) || "[]");
+      } catch {
+        localStorage.removeItem(this.KEY);
+        return [];
       }
     }
 
-    const total = subtotal + deliveryFee;
+    static save(cart) {
+      localStorage.setItem(this.KEY, JSON.stringify(cart));
+      window.dispatchEvent(new CustomEvent("cartUpdated", { detail: cart }));
+    }
 
-    // Update tampilan
-    const subtotalElement = document.getElementById("subtotalValue");
-    const deliveryElement = document.getElementById("deliveryValue");
-    const totalElement = document.getElementById("totalValue");
+    static inc(id) {
+      const cart = this.get();
+      const p = cart.find((x) => x.id === id);
+      if (p && p.quantity < MAX_QTY) {
+        p.quantity++;
+        this.save(cart);
+      }
+    }
 
-    if (subtotalElement && deliveryElement && totalElement) {
-      subtotalElement.textContent = formatRupiah(subtotal);
-      deliveryElement.textContent =
-        deliveryMethod === "takeaway" ? "Gratis" : formatRupiah(deliveryFee);
-      totalElement.textContent = formatRupiah(total);
+    static dec(id) {
+      const cart = this.get();
+      const idx = cart.findIndex((x) => x.id === id);
+      if (idx > -1) {
+        if (cart[idx].quantity > 1) cart[idx].quantity--;
+        else cart.splice(idx, 1);
+        this.save(cart);
+      }
+    }
+
+    static del(id) {
+      const filtered = this.get().filter((x) => x.id !== id);
+      this.save(filtered);
     }
   }
 
-  // Tambahkan event listener untuk input kode promo
-  const promoInput = document.getElementById("kodepromo") as HTMLInputElement;
-  promoInput.addEventListener("input", updateTotals);
+  // ------------------------- CHECKOUT CONTROLLER -------------------------
+  class CheckoutController {
+    static init() {
+      // cache elemen
+      this.el = {
+        cartContainer: document.getElementById("cartItems"),
+        emptyState: document.getElementById("emptyCart"),
+        formCustomer: document.getElementById("formCustomer"),
+        summary: document.querySelector(".summaryCart"),
+        subtotalVal: document.getElementById("subtotalValue"),
+        deliveryVal: document.getElementById("deliveryValue"),
+        totalVal: document.getElementById("totalValue"),
+        promoInput: document.getElementById("kodepromo"),
+        deliveryRadios: Array.from(
+          document.querySelectorAll('input[name="delivery"]')
+        ),
+        addressInput: document.getElementById("alamatlengkap"),
+        checkoutBtn: document.getElementById("checkoutButton"),
+        noteFee: document.querySelector(".noteFee"),
+      };
 
-  // Update totals saat halaman dimuat
-  document.addEventListener("DOMContentLoaded", updateTotals);
+      // bind events
+      window.addEventListener("cartUpdated", () => {
+        this.render();
+        this.updateTotals();
+      });
+      document.addEventListener("DOMContentLoaded", () => {
+        this.render();
+        this.updateTotals();
+      });
+      this.el.promoInput.addEventListener("input", () => this.updateTotals());
+      this.el.deliveryRadios.forEach((r) =>
+        r.addEventListener("change", () => {
+          this.onDeliveryChange();
+          this.updateTotals();
+        })
+      );
+      this.el.checkoutBtn?.addEventListener("click", (e) => {
+        e.preventDefault();
+        this.handleCheckout();
+      });
+    }
+
+    static render() {
+      const cart = CartManager.get();
+      const isEmpty = cart.length === 0;
+      // toggle UI
+      this.el.emptyState.style.display = isEmpty ? "flex" : "none";
+      this.el.cartContainer.style.display = isEmpty ? "none" : "flex";
+      this.el.formCustomer?.style.setProperty(
+        "display",
+        isEmpty ? "none" : "flex"
+      );
+      this.el.summary?.style.setProperty("display", isEmpty ? "none" : "flex");
+      if (isEmpty) return;
+
+      // clear and render each
+      this.el.cartContainer.innerHTML = "";
+      cart.forEach((p) => {
+        const card = document.createElement("div");
+        card.className = "cardCart";
+        card.id = p.id;
+        card.innerHTML = `
+          <div class="thumbnail" style="background-image:url('${p.image}')">
+            <div class="price">${formatRupiah(Number(p.price))}</div>
+          </div>
+          <div class="content">
+            <div class="data">
+              <div class="title">${p.name}<span class="qty">x${p.quantity}</span></div>
+            </div>
+            <div class="action"><div class="spacer"></div></div>
+          </div>
+        `;
+        const action = card.querySelector(".action");
+        // buttons
+        action.insertBefore(
+          this.makeBtn("Kurangi", () => CartManager.dec(p.id)),
+          action.firstChild
+        );
+        action.insertBefore(
+          this.makeBtn(
+            "Tambahin",
+            () => CartManager.inc(p.id),
+            p.quantity >= MAX_QTY
+          ),
+          action.firstChild
+        );
+        action.appendChild(this.makeBtn("Hapus", () => CartManager.del(p.id)));
+        this.el.cartContainer.appendChild(card);
+      });
+    }
+
+    static makeBtn(label, onClick, disabled = false) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = `button link${disabled ? " disabled" : ""}`;
+      btn.textContent = label;
+      btn.disabled = disabled;
+      btn.addEventListener("click", onClick);
+      return btn;
+    }
+
+    static calculate() {
+      const cart = CartManager.get();
+      const subtotal = cart.reduce(
+        (s, p) => s + Number(p.price) * p.quantity,
+        0
+      );
+      const method = document.querySelector(
+        'input[name="delivery"]:checked'
+      )?.value;
+      let fee = 0;
+
+      if (method === "delivery") {
+        fee = subtotal >= 60000 ? 5000 : 10000;
+        // promo only on delivery fee
+        const code = this.el.promoInput.value.toUpperCase();
+        if (code in promoCodes) fee = Math.max(0, fee - promoCodes[code]);
+        // show note only when subtotal>=60000
+        this.el.noteFee.style.display = subtotal >= 60000 ? "block" : "none";
+      } else {
+        fee = 0;
+        this.el.noteFee.style.display = "none";
+      }
+      return { subtotal, fee, total: subtotal + fee, method };
+    }
+
+    static updateTotals() {
+      const { subtotal, fee, total, method } = this.calculate();
+      this.el.subtotalVal.textContent = formatRupiah(subtotal);
+      this.el.deliveryVal.textContent =
+        method === "takeaway" ? "Gratis" : formatRupiah(fee);
+      this.el.totalVal.textContent = formatRupiah(total);
+    }
+
+    static onDeliveryChange() {
+      const method = document.querySelector(
+        'input[name="delivery"]:checked'
+      )?.value;
+      if (method === "takeaway") {
+        this.el.addressInput.value = "Ambil di toko";
+        this.el.addressInput.disabled = true;
+        // hide any existing error
+        const err =
+          this.el.addressInput.parentElement.querySelector(".errorText");
+        if (err) err.style.display = "none";
+      } else {
+        this.el.addressInput.value = "";
+        this.el.addressInput.disabled = false;
+      }
+    }
+
+    static validate() {
+      let ok = true;
+      let firstField = null;
+
+      // 1. Validasi Nama (min. 3 karakter)
+      const nameInp = document.getElementById("namalengkap");
+      const nameErr = nameInp.parentElement.querySelector(".errorText");
+      if (nameInp.value.trim().length < 3) {
+        nameErr.textContent = "Nama lengkap minimal 3 karakter";
+        nameErr.style.display = "block";
+        ok = false;
+        firstField = firstField || nameInp;
+      } else {
+        nameErr.style.display = "none";
+      }
+
+      // 2. Validasi WA (min. 10 digit angka)
+      const phoneInp = document.getElementById("nomorwa");
+      const phoneErr = phoneInp.parentElement.querySelector(".errorText");
+      const digits = phoneInp.value.replace(/\D/g, "");
+      if (digits.length < 10 || digits.length > 13) {
+        phoneErr.textContent = "Nomor WA harus 10-13 digit";
+        phoneErr.style.display = "block";
+        ok = false;
+        firstField = firstField || phoneInp;
+      } else {
+        phoneErr.style.display = "none";
+      }
+
+      // 3. Validasi Alamat hanya saat delivery
+      const delivery = document.querySelector(
+        'input[name="delivery"]:checked'
+      )?.value;
+      if (delivery === "delivery") {
+        const addrInp = this.el.addressInput;
+        const addrErr = addrInp.parentElement.querySelector(".errorText");
+        if (addrInp.value.trim().length < 10) {
+          addrErr.textContent = "Alamat harus lengkap minimal 10 karakter";
+          addrErr.style.display = "block";
+          ok = false;
+          firstField = firstField || addrInp;
+        } else {
+          addrErr.style.display = "none";
+        }
+      }
+
+      // 4. Keranjang tidak boleh kosong
+      if (CartManager.get().length === 0) {
+        alert("Keranjang masih kosong!");
+        ok = false;
+      }
+
+      // Scroll & focus ke field pertama yang gagal
+      if (!ok && firstField) {
+        firstField.scrollIntoView({ behavior: "smooth", block: "center" });
+        firstField.focus();
+      }
+
+      return ok;
+    }
+
+    static saveCustomer() {
+      const name = window.getInputValue("namalengkap");
+      const phone = window.getInputValue("nomorwa");
+      const address = window.getInputValue("alamatlengkap");
+      const pm =
+        document.querySelector('input[name="payment"]:checked')?.value ||
+        "transfer";
+      const dm =
+        document.querySelector('input[name="delivery"]:checked')?.value ||
+        "delivery";
+      const { subtotal, fee, total } = this.calculate();
+      const ts = new Date().toISOString();
+      const orderId = `${name.replace(/\s+/g, "").toUpperCase()}${Date.now()}`;
+
+      const data = {
+        name,
+        phone,
+        address,
+        paymentMethod: pm,
+        deliveryMethod: dm,
+        timestamp: ts,
+        orderId,
+        subtotal,
+        deliveryFee: fee,
+        total,
+      };
+      localStorage.setItem("customerData", JSON.stringify(data));
+      return data;
+    }
+
+    static async handleCheckout() {
+      if (!this.validate()) return;
+      
+      const FLIP_REDIRECT_URL = "https://chechecakes.biz.id/payment/tf";
+      const cust = this.saveCustomer();
+
+      if (cust.paymentMethod === "transfer") {
+        try {
+          const form = new URLSearchParams({
+            title: `Pembayaran ${cust.orderId}`,
+            type: "SINGLE",
+            amount: cust.total,
+            redirect_url: FLIP_REDIRECT_URL,
+            is_address_required: "1",
+            is_phone_number_required: "1",
+            step: "2",
+            sender_name: cust.name,
+            sender_email: "customer@chechecakes.biz.id",
+            sender_phone_number: cust.phone,
+            sender_address: cust.address,
+          });
+
+          const resp = await fetch(
+            "https://bigflip.id/big_sandbox_api/v2/pwf/bill",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Accept: "application/json",
+                Authorization:
+                  "Basic SkRKNUpERXpKRTQwUW5oSlZYVkxXRmhNTURaeE5HOWlNV1p6WVhWNlFXTnhaRzVPYkRCUFdWVlJWMUJWTDJsbGVqbGpZV2N5TmpWNmJDNVQ6",
+              },
+              body: form,
+            }
+          );
+
+          const result = await resp.json();
+          console.log("Flip API:", result);
+
+          // cari URL di berbagai kemungkinan
+          const raw =
+            result.link_url ??
+            result.data?.link_url ??
+            result.data?.payment?.link_url;
+          const linkId =
+            result.link_id ??
+            result.data?.link_id ??
+            result.data?.payment?.link_id;
+
+          if (!raw || !linkId) {
+            console.error("Flip response missing link_url or link_id:", result);
+            alert("Gagal mendapatkan data pembayaran.");
+            return;
+          }
+
+          const url = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+          
+          const flipData = { link_id: linkId, link_url: url };
+          localStorage.setItem("flipResponse", JSON.stringify(flipData));
+          // tambahan jika perlu
+          localStorage.setItem("flipLinkId", linkId);
+          localStorage.setItem("flipLinkUrl", url);
+
+          window.location.href = url;
+        } catch (err) {
+          console.error(err);
+          alert("Gagal memproses pembayaran. Silakan coba lagi.");
+        }
+      } else {
+        window.location.href = "/payment/cod";
+      }
+    }
+  }
+
+  // ------------------------- BOOTSTRAP -------------------------
+  CheckoutController.init();
 </script>

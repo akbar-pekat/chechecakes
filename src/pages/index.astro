@@ -69,196 +69,131 @@ const categories = [
   </div>
 </Layout>
 
-<script>
-  // ------------------------- CART FUNCTIONALITY -------------------------
+<script type="module">
+  // ------------------------- CART MANAGER -------------------------
+  class CartManager {
+    static CART_KEY = "cart";
+    static TS_KEY = "cartTimestamp";
+    static CUST_KEY = "customerData";
+    static EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 jam
 
-  // Get the cart from localStorage
-  const getCart = () => {
-    const cart = localStorage.getItem("cart");
-    const lastSavedTime = localStorage.getItem("cartTimestamp");
-    const currentTime = new Date().getTime();
-
-    // Jika ada timestamp dan selisihnya lebih dari 24 jam (dalam milidetik)
-    if (
-      lastSavedTime &&
-      currentTime - parseInt(lastSavedTime) > 24 * 60 * 60 * 1000
-    ) {
-      // Hapus keranjang, timestamp, dan data customer
-      localStorage.removeItem("cart");
-      localStorage.removeItem("cartTimestamp");
-      localStorage.removeItem("customerData");
-      return [];
-    }
-
-    return cart ? JSON.parse(cart) : [];
-  };
-
-  // Save the cart back to localStorage
-  const saveCart = (
-    cart: {
-      id: string;
-      name: string | null;
-      price: string | null;
-      image: string | null;
-      quantity: number;
-    }[]
-  ) => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-    // Simpan timestamp saat ini
-    localStorage.setItem("cartTimestamp", new Date().getTime().toString());
-  };
-
-  // Add product to the cart (or update quantity if already in cart)
-  const addToCart = (
-    id: string,
-    name: string,
-    price: string,
-    image: string
-  ) => {
-    const cart = getCart();
-    const existingProductIndex = cart.findIndex(
-      (product: { id: string }) => product.id === id
-    );
-
-    if (existingProductIndex !== -1) {
-      // If the product exists, increment the quantity (max 20)
-      const existingProduct = cart[existingProductIndex];
-      if (existingProduct.quantity < 20) {
-        existingProduct.quantity = Math.min(existingProduct.quantity + 1, 20);
+    static getCart() {
+      const ts = localStorage.getItem(this.TS_KEY);
+      if (ts && Date.now() - Number(ts) > this.EXPIRY_MS) {
+        this.clear();
+        return [];
       }
-    } else {
-      // If the product doesn't exist in cart, add a new item
-      cart.push({
-        id,
-        name,
-        price,
-        image,
-        quantity: 1,
-      });
+      try {
+        return JSON.parse(localStorage.getItem(this.CART_KEY) || "[]");
+      } catch {
+        console.warn("Invalid cart data, resetting.");
+        this.clear();
+        return [];
+      }
     }
 
-    // Save the updated cart to localStorage
-    saveCart(cart);
-  };
-
-  // Update the cart badge to reflect the total quantity of items in the cart
-  const updateCartBadge = () => {
-    const cart = getCart();
-    const totalQuantity = cart.reduce(
-      (total: number, product: { quantity: number }) =>
-        total + product.quantity,
-      0
-    );
-
-    const cartBadge = document.querySelector("#valueCart");
-
-    if (cartBadge) {
-      cartBadge.textContent =
-        totalQuantity > 0 ? `${totalQuantity} menu` : "0 menu";
-      (cartBadge as HTMLElement).style.display = "block";
+    static saveCart(cart) {
+      localStorage.setItem(this.CART_KEY, JSON.stringify(cart));
+      localStorage.setItem(this.TS_KEY, Date.now().toString());
     }
-  };
 
-  // Update button disabled state based on cart quantity
-  const updateButtonStates = () => {
-    const cart = getCart();
-    const buttons = document.querySelectorAll("button[data-id]");
+    static clear() {
+      [this.CART_KEY, this.TS_KEY, this.CUST_KEY].forEach((k) =>
+        localStorage.removeItem(k)
+      );
+    }
 
-    buttons.forEach((button) => {
-      const id = button.getAttribute("data-id");
-      const cartItem = cart.find((item: { id: string }) => item.id === id);
-
-      if (cartItem && cartItem.quantity >= 20) {
-        button.classList.add("disabled");
-        button.textContent = "Maksimal 20 item";
-      } else if (cartItem && cartItem.quantity > 0) {
-        button.classList.remove("disabled");
-        button.textContent = "Mau lagi";
+    static addItem({ id, name, price, image }) {
+      const cart = this.getCart();
+      const item = cart.find((p) => p.id === id);
+      if (item) {
+        item.quantity = Math.min(item.quantity + 1, 20);
       } else {
-        button.classList.remove("disabled");
-        button.textContent = "Mau yang ini";
+        cart.push({ id, name, price, image, quantity: 1 });
       }
-    });
-  };
-
-  // Add event listeners for all buttons to add products to the cart
-  const buttons = document.querySelectorAll("button[data-id]");
-  buttons.forEach((button) => {
-    button.addEventListener("click", function (this: HTMLButtonElement) {
-      const id = this.getAttribute("data-id");
-      const name = this.getAttribute("data-name");
-      const price = this.getAttribute("data-price");
-      const image = this.getAttribute("data-image");
-
-      if (id && name && price && image) {
-        addToCart(id, name, price, image); // Add to cart
-        updateCartBadge(); // Update the badge
-        updateButtonStates(); // Update button states
-      }
-    });
-  });
-
-  // ------------------------- CATEGORY FILTERING -------------------------
-
-  // Function to filter and display items based on selected category
-  const filterItemsByCategory = (selectedCategory: string) => {
-    const itemCards = document.querySelectorAll(".itemCard");
-
-    itemCards.forEach((card) => {
-      const cardCategory = card.getAttribute("data-category");
-
-      // Show all items if "Semua" category is selected
-      const displayStyle =
-        selectedCategory === "Semua" || cardCategory === selectedCategory
-          ? "block"
-          : "none";
-      (card as HTMLElement).style.display = displayStyle;
-    });
-  };
-  // Function to handle tab item clicks and apply active class
-  const handleTabClick = (tab: HTMLElement) => {
-    // Remove active class from all tabs
-    document
-      .querySelectorAll(".tabItem .container")
-      .forEach((container) => container.classList.remove("active"));
-
-    // Add active class to the clicked tab
-    const container = tab.querySelector(".container");
-    container?.classList.add("active");
-
-    // Get the selected category and filter the items
-    const selectedCategory = tab.getAttribute("data-category");
-    if (selectedCategory) {
-      filterItemsByCategory(selectedCategory);
+      this.saveCart(cart);
+      return cart;
     }
+
+    static totalQuantity() {
+      return this.getCart().reduce((sum, { quantity }) => sum + quantity, 0);
+    }
+  }
+
+  // ------------------------- SELECTORS -------------------------
+  const SEL = {
+    badge: "#valueCart",
+    addBtn: "button[data-id]",
+    tabItem: ".tabItem",
+    itemCard: ".itemCard",
+    semuaTab: '.tabItem[data-category="Semua"] .container',
   };
 
-  // ------------------------- INITIAL SETUP -------------------------
+  // ------------------------- UI UPDATES -------------------------
+  function updateCartBadge() {
+    const badge = document.querySelector(SEL.badge);
+    if (!badge) return;
+    const total = CartManager.totalQuantity();
+    badge.textContent = total ? `${total} menu` : "0 menu";
+    badge.style.display = "block";
+  }
 
-  // Initialize: Set active class for "Semua" tab
-  const semuaTabContainer = document.querySelector(
-    '.tabItem[data-category="Semua"] .container'
-  );
-  semuaTabContainer?.classList.add("active");
+  function updateButtonStates() {
+    CartManager.getCart(); // pastikan cart ter-load
+    document.querySelectorAll(SEL.addBtn).forEach((btn) => {
+      const id = btn.dataset.id;
+      const item = CartManager.getCart().find((i) => i.id === id);
+      if (item?.quantity >= 20) {
+        btn.classList.add("disabled");
+        btn.textContent = "Maksimal 20 item";
+      } else if (item) {
+        btn.classList.remove("disabled");
+        btn.textContent = "Mau lagi";
+      } else {
+        btn.classList.remove("disabled");
+        btn.textContent = "Mau yang ini";
+      }
+    });
+  }
 
-  // Initially display all item cards
-  filterItemsByCategory("Semua");
+  // ------------------------- EVENT BINDERS -------------------------
+  function bindAddButtons() {
+    document.querySelectorAll(SEL.addBtn).forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (btn.classList.contains("disabled")) return;
+        const { id, name, price, image } = btn.dataset;
+        if (id && name && price && image) {
+          CartManager.addItem({ id, name, price, image });
+          updateCartBadge();
+          updateButtonStates();
+        }
+      });
+    });
+  }
 
-  // Add event listeners for tab clicks
-  const tabItems = document.querySelectorAll(".tabItem");
-  tabItems.forEach((tab) => {
-    tab.addEventListener("click", () => handleTabClick(tab as HTMLElement));
-  });
+  function filterItems(category) {
+    document.querySelectorAll(SEL.itemCard).forEach((card) => {
+      const show = category === "Semua" || card.dataset.category === category;
+      card.style.display = show ? "block" : "none";
+    });
+  }
 
-  // Call updateButtonStates when the page is loaded
-  document.addEventListener("DOMContentLoaded", async () => {
-    updateCartBadge();
-    updateButtonStates();
-    
-    // Import dan inisialisasi intro.js secara dinamis
+  function bindTabs() {
+    document.querySelectorAll(SEL.tabItem).forEach((tab) => {
+      tab.addEventListener("click", () => {
+        document
+          .querySelectorAll(".tabItem .container")
+          .forEach((c) => c.classList.remove("active"));
+        tab.querySelector(".container")?.classList.add("active");
+        filterItems(tab.dataset.category || "Semua");
+      });
+    });
+  }
+
+  // ------------------------- INTRO.JS -------------------------
+  async function startIntro() {
     const introJs = (await import("intro.js")).default;
     await import("intro.js/minified/introjs.min.css");
-    
     introJs()
       .setOptions({
         prevLabel: "Kembali",
@@ -268,5 +203,21 @@ const categories = [
         dontShowAgainLabel: "Jangan tampilkan lagi",
       })
       .start();
+  }
+
+  // ------------------------- INITIALIZATION -------------------------
+  document.addEventListener("DOMContentLoaded", () => {
+    // Cart UI
+    updateCartBadge();
+    updateButtonStates();
+    bindAddButtons();
+
+    // Category tabs
+    document.querySelector(SEL.semuaTab)?.classList.add("active");
+    filterItems("Semua");
+    bindTabs();
+
+    // Intro.js
+    startIntro();
   });
 </script>

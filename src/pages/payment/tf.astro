@@ -60,176 +60,189 @@ import Button from "../../components/button.astro";
   </div>
 </Layout>
 
-<script>
-  let hasClickedWhatsApp = false;
+<script type="module">
+  // ------------------------- TRANSFER CONFIRMATION -------------------------
+  class TransferConfirmationController {
+    static init() {
+      // Cache elemen
+      this.el = {
+        successCard: document.getElementById("finishCardSuccess"),
+        emptyCard: document.getElementById("finishCardEmpty"),
+        checkingCard: document.getElementById("finishCardCheck"),
+        failedCard: document.getElementById("finishCardFailed"),
+        whatsappBtn: document.getElementById("whatsappButton"),
+        backBtn: document.querySelector(".buttonGroup button:first-child"),
+        refreshBtn: document.querySelector(
+          "#finishCardFailed button:first-child"
+        ),
+        backToFlipBtn: document.querySelector(
+          "#finishCardFailed button:last-child"
+        ),
+      };
+      this.hasSentWhatsapp = false;
 
-  // Fungsi untuk menampilkan card berdasarkan status
-  function showCard(cardId: string) {
-    const cards = document.querySelectorAll(".finishCard");
-    cards.forEach((card) => {
-      (card as HTMLElement).style.display = "none";
-    });
-    const selectedCard = document.getElementById(cardId);
-    if (selectedCard) {
-      selectedCard.style.display = "flex";
+      // Load data sekali
+      this.cartData = JSON.parse(localStorage.getItem("cart") || "[]");
+      this.customerData = JSON.parse(
+        localStorage.getItem("customerData") || "{}"
+      );
+      this.flipData = JSON.parse(localStorage.getItem("flipResponse") || "{}");
+
+      // Render initial card
+      this.showCard(this._determineInitialCard());
+
+      // Bind events
+      this.el.whatsappBtn?.addEventListener("click", () =>
+        this.sendToWhatsApp()
+      );
+      this.el.backBtn?.addEventListener("click", (e) => this.onBack(e));
+      this.el.refreshBtn?.addEventListener("click", () =>
+        this.checkPaymentStatus()
+      );
+      this.el.backToFlipBtn?.addEventListener("click", () =>
+        this.onBackToFlip()
+      );
+      window.addEventListener("pageshow", () =>
+        this.showCard(this._determineInitialCard())
+      );
+
+      // If we should check status, do it
+      if (this._shouldCheck()) {
+        this.checkPaymentStatus();
+      }
     }
-  }
 
-  // Fungsi untuk mengecek status pembayaran
-  async function checkPaymentStatus() {
-    try {
-      // Ambil link_id dari localStorage
-      const flipData = JSON.parse(localStorage.getItem("flipResponse") || "{}");
-      if (!flipData.link_id) {
-        showCard("finishCardFailed");
+    // Tentukan card mana yang tampil ketika pertama load/back
+    static _determineInitialCard() {
+      if (!this.cartData.length || !this.customerData.orderId) {
+        return "finishCardEmpty";
+      }
+      // Jika belum pernah cek, tampilkan checking
+      return this.el.checkingCard ? "finishCardCheck" : "finishCardCheck";
+    }
+
+    // Cek apakah perlu panggil API flip
+    static _shouldCheck() {
+      return this._determineInitialCard() === "finishCardCheck";
+    }
+
+    // Tampilkan salah satu card
+    static showCard(cardId) {
+      document.querySelectorAll(".finishCard").forEach((c) => {
+        c.style.display = "none";
+      });
+      const sel = document.getElementById(cardId);
+      if (sel) sel.style.display = "flex";
+    }
+
+    // Panggil API untuk cek status pembayaran
+    static async checkPaymentStatus() {
+      if (!this.flipData.link_id) {
+        return this.showCard("finishCardFailed");
+      }
+
+      try {
+        const headers = new Headers({
+          Accept: "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization:
+            "Basic SkRKNUpERXpKRTQwUW5oSlZYVkxXRmhNTURaeE5HOWlNV1p6WVhWNlFXTnhaRzVPYkRCUFdWVlJWMUJWTDJsbGVqbGpZV2N5TmpWNmJDNVQ6",
+        });
+
+        const resp = await fetch(
+          `https://bigflip.id/big_sandbox_api/v2/pwf/${this.flipData.link_id}/payment`,
+          { method: "GET", headers }
+        );
+        const result = await resp.json();
+        console.log("Payment status:", result);
+
+        const payments = result.data || [];
+        if (payments.length && payments[0].status === "SUCCESSFUL") {
+          this.showCard("finishCardSuccess");
+        } else {
+          this.showCard("finishCardFailed");
+        }
+      } catch (err) {
+        console.error("Error checking payment:", err);
+        this.showCard("finishCardFailed");
+      }
+    }
+
+    // Format dan kirim ke WhatsApp
+    static sendToWhatsApp() {
+      if (!this.cartData.length || !this.customerData.orderId) {
+        alert("Tidak ada data pesanan untuk dikirim.");
         return;
       }
 
-      const myHeaders = new Headers();
-      myHeaders.append("Accept", "application/json");
-      myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
-      myHeaders.append(
-        "Authorization",
-        "Basic SkRKNUpERXpKRTQwUW5oSlZYVkxXRmhNTURaeE5HOWlNV1p6WVhWNlFXTnhaRzVPYkRCUFdWVlJWMUJWTDJsbGVqbGpZV2N5TmpWNmJDNVQ6"
-      );
+      const c = this.customerData;
+      const lines = [
+        `*PESANAN BARU*`,
+        ``,
+        `*Detail Pelanggan:*`,
+        `Nama         : ${c.name}`,
+        `No. WA       : ${c.phone}`,
+        `Alamat       : ${c.address}`,
+        `Metode Bayar : Transfer Flip`,
+        `Metode Kirim : ${c.deliveryMethod === "delivery" ? "Diantar" : "Ambil Sendiri"}`,
+        ``,
+        `*Detail Pesanan:*`,
+      ];
 
-      const requestOptions: RequestInit = {
-        method: "GET",
-        headers: myHeaders,
-        redirect: "follow",
-      };
-
-      const response = await fetch(
-        `https://bigflip.id/big_sandbox_api/v2/pwf/${flipData.link_id}/payment`,
-        requestOptions
-      );
-      console.log(flipData.link_id);
-      const result = await response.json();
-      console.log(result);
-
-      // Cek status pembayaran dari data array
-      if (result.data && result.data.length > 0) {
-        const paymentData = result.data[0];
-
-        if (paymentData.status === "SUCCESSFUL") {
-          showCard("finishCardSuccess");
-        } else {
-          showCard("finishCardFailed");
-        }
-      } else {
-        showCard("finishCardFailed");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      showCard("finishCardFailed");
-    }
-  }
-
-  // Fungsi untuk mengirim pesan ke WhatsApp
-  function sendToWhatsApp() {
-    const cartData = localStorage.getItem("cart");
-    const customerData = localStorage.getItem("customerData");
-
-    function formatWhatsAppMessage() {
-      const cart = JSON.parse(cartData || "[]");
-      const customer = JSON.parse(customerData || "{}");
-
-      let message = `*PESANAN BARU*\n\n`;
-      message += `*Detail Pelanggan:*\n`;
-      message += `Nama: ${customer.name}\n`;
-      message += `No. WA: ${customer.phone}\n`;
-      message += `Alamat: ${customer.address}\n`;
-      message += `Metode Bayar: ${customer.paymentMethod === "transfer" ? "Transfer" : "Bayar Tunai"}\n`;
-      message += `Metode Kirim: ${customer.deliveryMethod === "delivery" ? "Diantar" : "Ambil Sendiri"}\n\n`;
-
-      message += `*Detail Pesanan:*\n`;
-      cart.forEach((item: any, index: number) => {
-        message += `${index + 1}. ${item.name} x${item.quantity} = Rp${(parseInt(item.price) * item.quantity).toLocaleString("id-ID")}\n`;
+      this.cartData.forEach((item, i) => {
+        lines.push(
+          `${i + 1}. ${item.name} x${item.quantity} = ${formatRupiah(item.price * item.quantity)}`
+        );
       });
 
-      message += `\n*Ringkasan Pembayaran:*\n`;
-      message += `Subtotal: Rp${customer.subtotal.toLocaleString("id-ID")}\n`;
-      message += `Ongkir: Rp${customer.deliveryFee.toLocaleString("id-ID")}\n`;
-      message += `Total: Rp${customer.total.toLocaleString("id-ID")}\n\n`;
+      lines.push(
+        ``,
+        `*Ringkasan Pembayaran:*`,
+        `Subtotal : ${formatRupiah(c.subtotal)}`,
+        `Ongkir   : ${formatRupiah(c.deliveryFee)}`,
+        `Total    : ${formatRupiah(c.total)}`,
+        ``,
+        `ID Pesanan: ${c.orderId}`
+      );
 
-      message += `ID Pesanan: ${customer.orderId}`;
-
-      return encodeURIComponent(message);
+      const msg = encodeURIComponent(lines.join("\n"));
+      window.open(`https://wa.me/6281906955567?text=${msg}`, "_blank");
+      this.hasSentWhatsapp = true;
     }
 
-    const message = formatWhatsAppMessage();
-    const whatsappUrl = `https://wa.me/6285156220232?text=${message}`;
-    window.open(whatsappUrl, "_blank");
-    hasClickedWhatsApp = true;
-  }
-
-  // Event listener untuk tombol WhatsApp
-  const whatsappButton = document.getElementById("whatsappButton");
-  if (whatsappButton) {
-    whatsappButton.addEventListener("click", sendToWhatsApp);
-  }
-
-  // Event listener untuk tombol kembali
-  const backButton = document.querySelector(".buttonGroup button:first-child");
-  if (backButton) {
-    backButton.addEventListener("click", (e) => {
-      e.preventDefault(); // Prevent default navigation
-
-      if (!hasClickedWhatsApp) {
+    // Tombol kembali
+    static onBack(e) {
+      e.preventDefault();
+      if (!this.hasSentWhatsapp) {
         alert("Jangan lupa kirim pesanan ke WhatsApp admin dulu ya! 🙏");
         return;
       }
-
       localStorage.removeItem("cart");
       localStorage.removeItem("customerData");
       localStorage.removeItem("flipResponse");
+      localStorage.removeItem("flipLinkId");
+      localStorage.removeItem("flipLinkUrl");
       window.location.href = "/";
-    });
-  }
-
-  // Event listener untuk tombol refresh
-  const refreshButton = document.querySelector("#finishCardFailed button");
-  if (refreshButton) {
-    refreshButton.addEventListener("click", () => {
-      window.location.reload();
-    });
-  }
-
-  // Event listener untuk tombol kembali ke Flip
-  const backToFlipButton = document.querySelector(
-    "#finishCardFailed button:last-child"
-  );
-  if (backToFlipButton) {
-    backToFlipButton.addEventListener("click", () => {
-      const flipData = JSON.parse(localStorage.getItem("flipResponse") || "{}");
-      if (flipData.link_url) {
-        window.location.href = flipData.link_url;
-      }
-    });
-  }
-
-  // Cek status pembayaran saat halaman dimuat
-  document.addEventListener("DOMContentLoaded", () => {
-    const finishCardSuccess = document.getElementById("finishCardSuccess");
-    const finishCardEmpty = document.getElementById("finishCardEmpty");
-    const finishCardCheck = document.getElementById("finishCardCheck");
-    const finishCardFailed = document.getElementById("finishCardFailed");
-
-    const cartData = localStorage.getItem("cart");
-    const customerData = localStorage.getItem("customerData");
-
-    if (cartData && customerData) {
-      if (finishCardSuccess) finishCardSuccess.style.display = "none";
-      if (finishCardEmpty) finishCardEmpty.style.display = "none";
-      if (finishCardCheck) finishCardCheck.style.display = "flex";
-      if (finishCardFailed) finishCardFailed.style.display = "none";
-      checkPaymentStatus();
-    } else {
-      if (finishCardSuccess) finishCardSuccess.style.display = "none";
-      if (finishCardEmpty) finishCardEmpty.style.display = "flex";
-      if (finishCardCheck) finishCardCheck.style.display = "none";
-      if (finishCardFailed) finishCardFailed.style.display = "none";
     }
+
+    // Tombol “Kembali ke Flip”
+    static onBackToFlip() {
+      if (this.flipData.link_url) {
+        window.location.href = /^https?:\/\//i.test(this.flipData.link_url)
+          ? this.flipData.link_url
+          : `https://${this.flipData.link_url}`;
+      }
+    }
+  }
+
+  // ------------------------- UTILS -------------------------
+  function formatRupiah(amount) {
+    return `Rp${Number(amount).toLocaleString("id-ID")}`;
+  }
+
+  // Inisialisasi
+  document.addEventListener("DOMContentLoaded", () => {
+    TransferConfirmationController.init();
   });
 </script>
 

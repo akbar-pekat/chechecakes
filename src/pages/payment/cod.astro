@@ -36,84 +36,127 @@ import Button from "../../components/button.astro";
   </div>
 </Layout>
 
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const finishCardSuccess = document.getElementById("finishCardSuccess");
-    const finishCardEmpty = document.getElementById("finishCardEmpty");
-    const whatsappButton = document.getElementById("whatsappButton");
-    const backButton = document.querySelector(
-      ".buttonGroup button:first-child"
-    );
+<script type="module">
+  const hasFlip =
+    localStorage.getItem("flipResponse") ||
+    localStorage.getItem("flipLinkId") ||
+    localStorage.getItem("flipLinkUrl");
 
-    console.log("Back button element:", backButton); // Debug
+  if (hasFlip) {
+    // redirect pakai replace agar tidak menambah history
+    window.location.replace("/payment/tf");
+  }
 
-    const cartData = localStorage.getItem("cart");
-    const customerData = localStorage.getItem("customerData");
-    let hasClickedWhatsApp = false;
+  // -------------------- CONFIRMATION CONTROLLER --------------------
+  class ConfirmationController {
+    static init() {
+      // cache elemen
+      this.el = {
+        successCard: document.getElementById("finishCardSuccess"),
+        emptyCard: document.getElementById("finishCardEmpty"),
+        whatsappButton: document.getElementById("whatsappButton"),
+        backButton: document.querySelector(".buttonGroup button:first-child"),
+      };
+      this.hasSentWhatsapp = false;
 
-    if (cartData && customerData) {
-      if (finishCardSuccess) finishCardSuccess.style.display = "flex";
-      if (finishCardEmpty) finishCardEmpty.style.display = "none";
-    } else {
-      if (finishCardSuccess) finishCardSuccess.style.display = "none";
-      if (finishCardEmpty) finishCardEmpty.style.display = "flex";
+      // parse data
+      this.cartData = JSON.parse(localStorage.getItem("cart") || "[]");
+      this.customerData = JSON.parse(
+        localStorage.getItem("customerData") || "{}"
+      );
+
+      // render UI sesuai data
+      this.renderStatus();
+
+      // bind events
+      this.el.whatsappButton?.addEventListener("click", () =>
+        this.onWhatsApp()
+      );
+      this.el.backButton?.addEventListener("click", (e) => this.onBack(e));
     }
 
-    // Fungsi untuk memformat pesan WhatsApp
-    function formatWhatsAppMessage() {
-      const cart = JSON.parse(cartData || "[]");
-      const customer = JSON.parse(customerData || "{}");
+    static renderStatus() {
+      const hasData =
+        this.cartData.length > 0 && Object.keys(this.customerData).length > 0;
 
-      let message = `*PESANAN BARU*\n\n`;
-      message += `*Detail Pelanggan:*\n`;
-      message += `Nama: ${customer.name}\n`;
-      message += `No. WA: ${customer.phone}\n`;
-      message += `Alamat: ${customer.address}\n`;
-      message += `Metode Bayar: ${customer.paymentMethod === "transfer" ? "Transfer" : "Bayar Tunai"}\n`;
-      message += `Metode Kirim: ${customer.deliveryMethod === "delivery" ? "Diantar" : "Ambil Sendiri"}\n\n`;
+      if (hasData) {
+        this.el.successCard?.style.setProperty("display", "flex");
+        this.el.emptyCard?.style.setProperty("display", "none");
+      } else {
+        this.el.successCard?.style.setProperty("display", "none");
+        this.el.emptyCard?.style.setProperty("display", "flex");
+      }
+    }
 
-      message += `*Detail Pesanan:*\n`;
-      cart.forEach((item: any, index: number) => {
-        message += `${index + 1}. ${item.name} x${item.quantity} = Rp${(parseInt(item.price) * item.quantity).toLocaleString("id-ID")}\n`;
+    static formatWhatsAppMessage() {
+      const c = this.customerData;
+      const lines = [
+        `*PESANAN BARU*`,
+        ``,
+        `*Detail Pelanggan:*`,
+        `Nama         : ${c.name}`,
+        `No. WA       : ${c.phone}`,
+        `Alamat       : ${c.address}`,
+        `Metode Bayar : Bayar Tunai`,
+        `Metode Kirim : ${c.deliveryMethod === "delivery" ? "Diantar" : "Ambil Sendiri"}`,
+        ``,
+        `*Detail Pesanan:*`,
+      ];
+
+      this.cartData.forEach((item, i) => {
+        const line = `${i + 1}. ${item.name} x${item.quantity} = ${formatRupiah(item.price * item.quantity)}`;
+        lines.push(line);
       });
 
-      message += `\n*Ringkasan Pembayaran:*\n`;
-      message += `Subtotal: Rp${customer.subtotal.toLocaleString("id-ID")}\n`;
-      message += `Ongkir: Rp${customer.deliveryFee.toLocaleString("id-ID")}\n`;
-      message += `Total: Rp${customer.total.toLocaleString("id-ID")}\n\n`;
+      lines.push(
+        ``,
+        `*Ringkasan Pembayaran:*`,
+        `Subtotal : ${formatRupiah(c.subtotal)}`,
+        `Ongkir   : ${formatRupiah(c.deliveryFee)}`,
+        `Total    : ${formatRupiah(c.total)}`,
+        ``,
+        `ID Pesanan: ${c.orderId}`
+      );
 
-      message += `ID Pesanan: ${customer.orderId}`;
-
-      return encodeURIComponent(message);
+      return encodeURIComponent(lines.join("\n"));
     }
 
-    // Event listener untuk tombol WhatsApp
-    if (whatsappButton) {
-      whatsappButton.addEventListener("click", () => {
-        const message = formatWhatsAppMessage();
-        const whatsappUrl = `https://wa.me/6285156220232?text=${message}`;
-        window.open(whatsappUrl, "_blank");
-        hasClickedWhatsApp = true;
-      });
+    static onWhatsApp() {
+      if (this.cartData.length === 0 || !this.customerData.orderId) {
+        alert("Tidak ada data pesanan untuk dikirim.");
+        return;
+      }
+      const msg = this.formatWhatsAppMessage();
+      const url = `https://wa.me/6281906955567?text=${msg}`;
+      window.open(url, "_blank");
+      this.hasSentWhatsapp = true;
     }
 
-    // Event listener untuk tombol kembali
-    if (backButton) {
-      backButton.addEventListener("click", (e) => {
-        e.preventDefault(); // Prevent default navigation
-        
-        if (!hasClickedWhatsApp) {
-          alert("Jangan lupa kirim pesanan ke WhatsApp admin dulu ya! 🙏");
-          return;
-        }
-        
-        localStorage.removeItem("cart");
-        localStorage.removeItem("customerData");
-        window.location.href = "/";
-      });
-    } else {
-      console.log("Back button not found!"); // Debug
+    static onBack(e) {
+      e.preventDefault();
+      if (!this.hasSentWhatsapp) {
+        alert("Jangan lupa kirim pesanan ke WhatsApp admin dulu ya! 🙏");
+        return;
+      }
+      // clear storage dan kembali
+      localStorage.removeItem("cart");
+      localStorage.removeItem("customerData");
+      window.location.href = "/";
     }
+  }
+
+  // helper util
+  function formatRupiah(amount) {
+    return `Rp${Number(amount).toLocaleString("id-ID")}`;
+  }
+
+  // inisialisasi
+  document.addEventListener("DOMContentLoaded", () =>
+    ConfirmationController.init()
+  );
+
+  window.addEventListener("pageshow", () => {
+    ConfirmationController.renderStatus();
   });
 </script>
 

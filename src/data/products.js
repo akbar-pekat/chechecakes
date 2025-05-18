@@ -58,7 +58,7 @@ export const products = [
       },
       {
         id: 2.3,
-        name: "Bundle 3: Trio Rasa",
+        name: "Bundle 3: Trio Rasa Mantap",
         description:
           "Campuran 2 donat meises, 2 gula mini, dan 2 krim keju. Paket hemat buat pecinta variasi rasa.",
         price: 30000,
