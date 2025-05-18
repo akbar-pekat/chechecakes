@@ -8,6 +8,12 @@
   justify-content: flex-start;
   width: 100%;
   position: relative;
+  transition: all 0.3s ease;
+}
+
+.productCard:hover {
+  border: 1px solid #000000;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 1);
 }
 
 .productCard .thumbnail {
@@ -49,6 +55,7 @@
   font-size: 14px;
   line-height: 16px;
   font-weight: 500;
+  user-select: none;
 }
 
 .productCard .thumbnail .price {

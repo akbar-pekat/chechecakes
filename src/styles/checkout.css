@@ -34,6 +34,12 @@
   justify-content: flex-start;
   align-self: stretch;
   position: relative;
+  transition: all 0.3s ease;
+}
+
+.emptycartCard:hover {
+  border: 1px solid #000000;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 1);
 }
 
 .emptycartCard h2 {
@@ -81,6 +87,13 @@
   align-self: stretch;
   position: relative;
   width: 100%;
+  transition: all 0.3s ease;
+}
+
+.formCustomer .containerForm:hover {
+  border: 1px solid #000000;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 1);
+  border-radius: 4px;
 }
 
 .customOptions {
@@ -205,6 +218,12 @@
   justify-content: flex-start;
   align-self: stretch;
   position: relative;
+  transition: all 0.3s ease;
+}
+
+.summaryCart:hover {
+  border: 1px solid #000000;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 1);
 }
 
 .subtotalContainer {

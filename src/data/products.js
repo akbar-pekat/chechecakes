@@ -31,6 +31,13 @@ export const products = [
         price: 5000,
         image: "/menu/krimkeju.jpg",
       },
+      {
+        id: 1.4,
+        name: "Donat Oreo",
+        description: "Donat lembut dengan taburan Oreo yang crunchy.",
+        price: 5000,
+        image: "/menu/oreo.jpeg",
+      },
     ],
   },
 
@@ -94,8 +101,8 @@ export const products = [
       },
       {
         id: 2.7,
-        name: "Full Mint!",
-        description: "Semua gula mint! Seger, manis, dan ringan di mulut~ 🍃",
+        name: "Full Gila Min!",
+        description: "Semua topping gula halus! Manisnya lembut, cocok buat yang suka yang ringan~",
         price: 30000,
         stock: 6,
         image: "/thumbnail.jpg",
