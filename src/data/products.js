@@ -1,7 +1,7 @@
 export const products = [
   {
     id: 1,
-    name: "Donat Kentang Satuan",
+    name: "Donat Kentang",
     variants: [
       {
         id: 1.1,
@@ -40,36 +40,62 @@ export const products = [
     variants: [
       {
         id: 2.1,
-        name: "Bundle 1: Coklat Lovers",
+        name: "Manis Duo: Meses & Mint",
         description:
-          "3 donat meises & 3 donat coklat kacang. Coklatnya dapet, krenyesnya dapet!",
+          "3 coklat meses + 3 gula mint. Manis & segar, pas buat ngemil santai~",
         price: 30000,
         stock: 6,
         image: "/thumbnail.jpg",
       },
       {
         id: 2.2,
-        name: "Bundle 2: Manis Lembut",
+        name: "Meses & Creamy",
         description:
-          "3 donat gula halus & 3 donat krim keju lembut. Perpaduan manis ringan dan creamy yang pas banget buat santai.",
+          "3 coklat meses + 3 cream keju. Perpaduan coklat dan lembutnya keju yang bikin nagih~",
         price: 30000,
         stock: 6,
         image: "/thumbnail.jpg",
       },
       {
         id: 2.3,
-        name: "Bundle 3: Trio Rasa Mantap",
+        name: "Campur Seru 2-2-2",
         description:
-          "Campuran 2 donat meises, 2 gula mini, dan 2 krim keju. Paket hemat buat pecinta variasi rasa.",
+          "2 meses, 2 mint, 2 cream keju. Campuran lengkap buat kamu yang susah milih 😄",
         price: 30000,
         stock: 6,
         image: "/thumbnail.jpg",
       },
       {
         id: 2.4,
-        name: "Bundle 4: All In Mix",
+        name: "Kacang & Meses",
         description:
-          "Isi lengkap 4 varian donat dalam 6 pcs. Cocok buat kamu yang pengen cobain semua rasa!",
+          "3 coklat kacang + 3 coklat meses. Kombinasi crunchy dan chocolaty yang pas banget!",
+        price: 30000,
+        stock: 6,
+        image: "/thumbnail.jpg",
+      },
+      {
+        id: 2.5,
+        name: "Oreo & Creamy",
+        description:
+          "3 coklat Oreo + 3 cream keju. Duo creamy favorit semua umur~",
+        price: 30000,
+        stock: 6,
+        image: "/thumbnail.jpg",
+      },
+      {
+        id: 2.6,
+        name: "Full Meses!",
+        description:
+          "Semua coklat meses! Buat kamu yang gak pernah bosen sama topping legend satu ini 🍫",
+        price: 30000,
+        stock: 6,
+        image: "/thumbnail.jpg",
+      },
+      {
+        id: 2.7,
+        name: "Full Mint!",
+        description: "Semua gula mint! Seger, manis, dan ringan di mulut~ 🍃",
         price: 30000,
         stock: 6,
         image: "/thumbnail.jpg",
