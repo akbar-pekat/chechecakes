@@ -3,9 +3,8 @@ export interface Props {
   title?: string;
 }
 
-const {
-  title = "Cheche Cakes Web Order | Ahlinya Donat Kentang & Brownies Panggang",
-} = Astro.props;
+const { title = "Cheche Cakes - Pesan kue favoritmu lewat WhatsApp" } =
+  Astro.props;
 
 import "../styles/layout.css";
 import "@fontsource/instrument-sans";
@@ -24,6 +23,41 @@ import "@fontsource/instrument-sans/700.css";
     <title>{title}</title>
     <meta name="theme-color" content="#351500" />
     <meta name="generator" content={Astro.generator} />
+    <meta
+      name="description"
+      content="Pesan aneka kue rumahan langsung via WhatsApp dari Cheche Cakes - toko kue di Sumbawa Besar, NTB. Praktis, manis, dan personal!"
+    />
+    <meta
+      name="keywords"
+      content="kue rumahan, pesan kue online, toko kue whatsapp, cheche cakes, kue ulang tahun, brownies, red velvet, kue Sumbawa Besar, toko kue NTB, pesan kue Sumbawa, kue ulang tahun Sumbawa Besar, bakery Sumbawa Besar, kue custom NTB"
+    />
+    <meta name="author" content="Cheche Cakes" />
+
+    <!-- Open Graph (Facebook, LinkedIn, dll) -->
+    <meta
+      property="og:title"
+      content="Cheche Cakes - Pesan kue favoritmu lewat WhatsApp"
+    />
+    <meta
+      property="og:description"
+      content="Kue rumahan favorit yang bisa kamu pesan langsung via WhatsApp. Lihat menu, pilih, isi data, kirim!"
+    />
+    <meta property="og:image" content="/thumbnail.jpg" />
+    <meta property="og:url" content="https://www.chechecakes.biz.id/" />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Cheche Cakes - Pesan kue favoritmu lewat WhatsApp"
+    />
+    <meta
+      name="twitter:description"
+      content="Kue rumahan yang praktis dipesan via WhatsApp. Gak perlu ribet, tinggal klik!"
+    />
+    <meta name="twitter:image" content="/thumbnail.jpg" />
+
     <!-- Icons -->
     <link
       rel="stylesheet"
