@@ -1,6 +1,8 @@
 ---
 import Layout from "../../layouts/layout.astro";
 import Button from "../../components/button.astro";
+
+const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
 ---
 
 <Layout>
@@ -60,7 +62,7 @@ import Button from "../../components/button.astro";
   </div>
 </Layout>
 
-<script type="module">
+<script type="module" define:vars={{ FLIP_API_KEY }}>
   (function () {
     const hasFlipData =
       localStorage.getItem("flipResponse") ||
@@ -156,8 +158,7 @@ import Button from "../../components/button.astro";
         const headers = new Headers({
           Accept: "application/json",
           "Content-Type": "application/x-www-form-urlencoded",
-          Authorization:
-            "Basic SkRKNUpERXpKRTQwUW5oSlZYVkxXRmhNTURaeE5HOWlNV1p6WVhWNlFXTnhaRzVPYkRCUFdWVlJWMUJWTDJsbGVqbGpZV2N5TmpWNmJDNVQ6",
+          Authorization: `Basic ${FLIP_API_KEY}`,
         });
 
         const resp = await fetch(

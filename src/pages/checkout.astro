@@ -6,6 +6,8 @@ import Input from "../components/input.astro";
 import "../styles/checkout.css";
 import "../styles/cartCard.css";
 import "../styles/button.css";
+
+const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
 ---
 
 <Layout>
@@ -139,7 +141,7 @@ import "../styles/button.css";
   </div>
 </Layout>
 
-<script type="module">
+<script type="module" define:vars={{ FLIP_API_KEY }}>
   // ------------------------- UTIL -------------------------
   const MAX_QTY = 20;
   const promoCodes = {
@@ -445,7 +447,7 @@ import "../styles/button.css";
 
     static async handleCheckout() {
       if (!this.validate()) return;
-      
+
       const FLIP_REDIRECT_URL = "https://chechecakes.biz.id/payment/tf";
       const cust = this.saveCustomer();
 
@@ -472,8 +474,7 @@ import "../styles/button.css";
               headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
                 Accept: "application/json",
-                Authorization:
-                  "Basic SkRKNUpERXpKRTQwUW5oSlZYVkxXRmhNTURaeE5HOWlNV1p6WVhWNlFXTnhaRzVPYkRCUFdWVlJWMUJWTDJsbGVqbGpZV2N5TmpWNmJDNVQ6",
+                Authorization: `Basic ${FLIP_API_KEY}`,
               },
               body: form,
             }
@@ -499,7 +500,7 @@ import "../styles/button.css";
           }
 
           const url = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
-          
+
           const flipData = { link_id: linkId, link_url: url };
           localStorage.setItem("flipResponse", JSON.stringify(flipData));
           // tambahan jika perlu
