@@ -13,16 +13,7 @@ const categories = [
 ---
 
 <Layout>
-  <div
-    data-title="Hai, selamat datang di Cheche Cakes!"
-    data-intro="Yuk tur bentar biar tau cara pesannya~ atau langsung lewatin aja. Centang dibawah biar gak muncul lagi nanti."
-  >
-  </div>
-  <div
-    class="categorySection"
-    data-title="Lihat-lihat kuenya per kategori~"
-    data-intro="Di sini kamu bisa pilih produk berdasarkan kategori, jadi gak perlu capek-capek scroll. ✨"
-  >
+  <div class="categorySection">
     {
       categories.map((category) => (
         <div class="tabItem" data-category={category}>
@@ -32,11 +23,7 @@ const categories = [
     }
   </div>
 
-  <div
-    class="productList"
-    data-title="Daftar kuenya nih~"
-    data-intro="Kalau ada yang kamu suka, tinggal klik tombol Mau yang ini atau Mau lagi buat masukin ke keranjang 🍰"
-  >
+  <div class="productList">
     {
       products.map((product) =>
         product.variants ? (
@@ -54,11 +41,7 @@ const categories = [
     }
   </div>
 
-  <div
-    class="footerCart"
-    data-title="Ini keranjang kamu~"
-    data-intro="Di sini kamu bisa cek udah berapa menu yang kamu pilih, tinggal lanjut aja kalau udah pas!"
-  >
+  <div class="footerCart">
     <div class="container">
       <div class="textContent">
         <div class="label">Keranjang saya</div>
@@ -190,20 +173,8 @@ const categories = [
     });
   }
 
-  // ------------------------- INTRO.JS -------------------------
-  async function startIntro() {
-    const introJs = (await import("intro.js")).default;
-    await import("intro.js/minified/introjs.min.css");
-    introJs()
-      .setOptions({
-        prevLabel: "Kembali",
-        nextLabel: "Lanjut",
-        doneLabel: "Oke, paham",
-        dontShowAgain: true,
-        dontShowAgainLabel: "Jangan tampilkan lagi",
-      })
-      .start();
-  }
+  // -------------------------  SHEPHERD JS -------------------------
+  
 
   // ------------------------- INITIALIZATION -------------------------
   document.addEventListener("DOMContentLoaded", () => {
@@ -216,8 +187,5 @@ const categories = [
     document.querySelector(SEL.semuaTab)?.classList.add("active");
     filterItems("Semua");
     bindTabs();
-
-    // Intro.js
-    startIntro();
   });
 </script>
