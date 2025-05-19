@@ -59,9 +59,9 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
           </div>
           <div class="options">
             <label class="option">
-              <input type="radio" name="payment" value="transfer" checked />
+              <input type="radio" name="payment" value="transfer" disabled />
               <div class="optionContent">
-                <div class="optionTitle">Transfer via Flip</div>
+                <div class="optionTitle">Transfer via Flip (Perbaikan)</div>
                 <div class="optionDesc">
                   Bayar lewat Flip, gampang dan cepat!
                 </div>
@@ -69,7 +69,7 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
             </label>
 
             <label class="option">
-              <input type="radio" name="payment" value="cash" />
+              <input type="radio" name="payment" value="cash" checked />
               <div class="optionContent">
                 <div class="optionTitle">Bayar tunai</div>
                 <div class="optionDesc">
@@ -78,6 +78,10 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
                 </div>
               </div>
             </label>
+          </div>
+          <div class="noteFlip">
+            Transfer via Flip-nya lagi off sementara, tapi kamu tetap bisa minta
+            link bayar ke admin kok~
           </div>
         </div>
 
@@ -374,8 +378,21 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
       const phoneInp = document.getElementById("nomorwa");
       const phoneErr = phoneInp.parentElement.querySelector(".errorText");
       const digits = phoneInp.value.replace(/\D/g, "");
-      if (digits.length < 10 || digits.length > 13) {
-        phoneErr.textContent = "Nomor WA harus 10-13 digit";
+      // if (digits.length < 10 || digits.length > 13) {
+      //   phoneErr.textContent = "Nomor WA harus 10-13 digit";
+      //   phoneErr.style.display = "block";
+      //   ok = false;
+      //   firstField = firstField || phoneInp;
+      // } else {
+      //   phoneErr.style.display = "none";
+      // }
+
+      if (
+        digits.length < 10 ||
+        !(digits.startsWith("62") || digits.startsWith("08"))
+      ) {
+        phoneErr.textContent =
+          "Nomor WA harus diawali 62/08 dan minimal 10 digit";
         phoneErr.style.display = "block";
         ok = false;
         firstField = firstField || phoneInp;

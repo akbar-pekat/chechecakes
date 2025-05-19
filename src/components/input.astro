@@ -14,7 +14,11 @@ const {
   placeholder,
   id,
   type = "text",
-  minLength = type === "tel" ? 10 : type === "text" && id === "alamatlengkap" ? 10 : 3,
+  minLength = type === "tel"
+    ? 10
+    : type === "text" && id === "alamatlengkap"
+      ? 10
+      : 3,
 } = Astro.props;
 
 import "../styles/input.css";
@@ -63,8 +67,11 @@ import "../styles/input.css";
   }
 
   function isValidIndonesianPhone(value: string): boolean {
-    const phoneRegex = /^08[0-9]{8,10}$/;
-    return phoneRegex.test(value);
+    // const phoneRegex = /^08[0-9]{8,10}$/;
+    // return phoneRegex.test(value);
+    return (
+      (value.startsWith("08") || value.startsWith("62")) && value.length >= 10
+    );
   }
 
   function getErrorMessage(input: HTMLInputElement, value: string): string {
@@ -151,9 +158,9 @@ import "../styles/input.css";
           }
 
           // Batasi panjang maksimal
-          if (value.length > 13) {
-            value = value.slice(0, 13);
-          }
+          // if (value.length > 13) {
+          //   value = value.slice(0, 13);
+          // }
 
           inputElement.value = value;
         });
@@ -180,7 +187,7 @@ import "../styles/input.css";
       const inputElement = input as HTMLInputElement;
       // Skip validasi untuk kode promo
       if (inputElement.id === "kodepromo") return;
-      
+
       const errorElement = document.getElementById(`${inputElement.id}-error`);
       if (errorElement) {
         if (!validateInput(inputElement, errorElement)) {

@@ -206,6 +206,34 @@
   transform: translate(-2px, -2px);
 }
 
+.customOptions .options .option:has(input[type="radio"]:disabled) {
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+  transform: none;
+}
+
+.customOptions .options .option:has(input[type="radio"]:disabled):hover {
+  box-shadow: none;
+  transform: none;
+  border-color: #cccccc;
+}
+
+.customOptions
+  .options
+  .option
+  input[type="radio"]:disabled
+  + .optionContent
+  .optionTitle,
+.customOptions
+  .options
+  .option
+  input[type="radio"]:disabled
+  + .optionContent
+  .optionDesc {
+  color: #999999;
+}
+
 .summaryCart {
   background: #ffffff;
   border-radius: 4px;
@@ -289,7 +317,8 @@
   font-weight: 500;
 }
 
-.noteFee {
+.noteFee,
+.noteFlip {
   color: #808080;
   font-size: 14px;
   line-height: 16px;
