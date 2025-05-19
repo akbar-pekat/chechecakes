@@ -3,6 +3,8 @@ import { getAllPosts, getPost } from "../../../lib/client";
 import Layout from "../../../layouts/layout.astro";
 import Button from "../../../components/button.astro";
 
+export const prerender = true;
+
 export async function getStaticPaths() {
   const data = await getAllPosts();
   const allPosts = data.publication.posts.edges;
@@ -30,7 +32,12 @@ const post = await getPost(slug);
           <img src="/thumbnail.jpg" alt="logoAuthor" class="authorImage" />
           <span>Admin Cheche Cakes</span>
         </div>
-        <div class="readTime">{post.readTimeInMinutes} menit membaca</div>
+        <div class="time">
+          <span class="readTimeLabel">Waktu baca:</span>
+          <span class="readTime">
+            {post.readTimeInMinutes} menit
+          </span>
+        </div>
       </div>
     </div>
 
@@ -67,6 +74,7 @@ const post = await getPost(slug);
     flex-direction: column;
     gap: 16px;
     width: 100%;
+    user-select: none;
     /* margin-bottom: 24px; */
   }
 
@@ -112,8 +120,22 @@ const post = await getPost(slug);
     object-fit: cover;
   }
 
+  .time {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    align-items: center;
+    user-select: none;
+  }
+
+  .readTimeLabel {
+    color: #767676;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
   .readTime {
-    color: #808080;
+    color: #000000;
     font-size: 14px;
     line-height: 20px;
   }

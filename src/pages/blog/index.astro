@@ -5,33 +5,51 @@ import Button from "../../components/button.astro";
 
 const data = await getAllPosts();
 const allPosts = data.publication.posts.edges;
+const hasPosts = allPosts.length > 0;
 ---
 
 <Layout>
   <div class="container">
     <h1 class="pageTitle">Blog Cheche Cakes</h1>
-    <div class="blogList">
-      {
-        allPosts.map((post) => (
-          <div class="blogCard">
-            <div
-              class="thumbnail"
-              style={`background: url(${post.node.coverImage.url}) center; background-size: cover; background-repeat: no-repeat;`}
-            />
-            <div class="content">
-              <h2>{post.node.title}</h2>
-              <p class="brief">{post.node.brief}</p>
-              <div class="meta">
-                <span class="readTime">
-                  {post.node.readTimeInMinutes} menit
-                </span>
-                <Button href={`/blog/p/${post.node.slug}`}>Baca</Button>
+    {
+      hasPosts ? (
+        <div class="blogList">
+          {allPosts.map((post) => (
+            <div class="blogCard">
+              <div
+                class="thumbnail"
+                style={`background: url(${post.node.coverImage.url}) center; background-size: cover; background-repeat: no-repeat;`}
+              />
+              <div class="content">
+                <h2>{post.node.title}</h2>
+                <p class="brief">{post.node.brief}</p>
+                <div class="meta">
+                  <div class="time">
+                    <span class="readTimeLabel">Waktu baca:</span>
+                    <span class="readTime">
+                      {post.node.readTimeInMinutes} menit
+                    </span>
+                  </div>
+                  <Button href={`/blog/p/${post.node.slug}`}>
+                    Baca selengkapnya
+                  </Button>
+                </div>
               </div>
             </div>
+          ))}
+        </div>
+      ) : (
+        <div class="finishCard" id="finishCardSuccess">
+          <img src="/404.svg" class="illust" alt="IllustCart" />
+          <h2>Oops, belum ada cerita manis di sini 😅</h2>
+          <div class="description">
+            Kita lagi siapin tulisan-tulisan seru soal kue, tips, dan cerita
+            dari dapur Cheche Cakes. Tungguin ya, bakal manis banget kok~ 🍰
           </div>
-        ))
-      }
-    </div>
+          <Button href="/">Kembali ke beranda</Button>
+        </div>
+      )
+    }
   </div>
 </Layout>
 
@@ -60,12 +78,13 @@ const allPosts = data.publication.posts.edges;
     line-height: 32px;
     font-weight: 600;
     width: 100%;
-    margin-bottom: 16px;
+    user-select: none;
+    /* margin-bottom: 16px; */
   }
 
   .blogList {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
+    flex-direction: column;
     gap: 24px;
     width: 100%;
   }
@@ -126,9 +145,69 @@ const allPosts = data.publication.posts.edges;
     margin-top: 8px;
   }
 
+  .meta .time {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    align-items: center;
+    user-select: none;
+  }
+
   .readTime {
-    color: #808080;
+    color: #000000;
     font-size: 14px;
     line-height: 20px;
+  }
+
+  .readTimeLabel {
+    color: #767676;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .finishCard {
+    background: #ffffff;
+    border-radius: 4px;
+    border: 1px solid #000000;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    justify-content: flex-start;
+    align-self: stretch;
+    position: relative;
+  }
+
+  .finishCard h2 {
+    color: #000000;
+    text-align: center;
+    font-size: 20px;
+    line-height: 24px;
+    font-weight: 500;
+  }
+
+  .finishCard .description {
+    color: #000000;
+    text-align: center;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 400;
+  }
+
+  .buttonGroup {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .smallNote {
+    color: #808080;
+    text-align: center;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 400;
+    position: relative;
+    align-self: stretch;
   }
 </style>
