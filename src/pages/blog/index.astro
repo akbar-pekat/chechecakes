@@ -1,0 +1,134 @@
+---
+import { getAllPosts } from "../../lib/client";
+import Layout from "../../layouts/layout.astro";
+import Button from "../../components/button.astro";
+
+const data = await getAllPosts();
+const allPosts = data.publication.posts.edges;
+---
+
+<Layout>
+  <div class="container">
+    <h1 class="pageTitle">Blog Cheche Cakes</h1>
+    <div class="blogList">
+      {
+        allPosts.map((post) => (
+          <div class="blogCard">
+            <div
+              class="thumbnail"
+              style={`background: url(${post.node.coverImage.url}) center; background-size: cover; background-repeat: no-repeat;`}
+            />
+            <div class="content">
+              <h2>{post.node.title}</h2>
+              <p class="brief">{post.node.brief}</p>
+              <div class="meta">
+                <span class="readTime">
+                  {post.node.readTimeInMinutes} menit
+                </span>
+                <Button href={`/blog/p/${post.node.slug}`}>Baca</Button>
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .container {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    align-items: flex-start;
+    justify-content: flex-start;
+    align-self: stretch;
+    flex: 1;
+    position: relative;
+    overflow-y: scroll;
+  }
+
+  .container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pageTitle {
+    color: #000000;
+    text-align: center;
+    font-size: 24px;
+    line-height: 32px;
+    font-weight: 600;
+    width: 100%;
+    margin-bottom: 16px;
+  }
+
+  .blogList {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    width: 100%;
+  }
+
+  .blogCard {
+    background: #ffffff;
+    border-radius: 4px;
+    border: 1px solid #000000;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    transition: all 0.3s ease;
+  }
+
+  .blogCard:hover {
+    box-shadow: 4px 4px 0 #000000;
+  }
+
+  .thumbnail {
+    height: 200px;
+    width: 100%;
+    position: relative;
+  }
+
+  .content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .content h2 {
+    color: #000000;
+    font-size: 20px;
+    line-height: 24px;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .brief {
+    color: #333333;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 400;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .meta {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+  }
+
+  .readTime {
+    color: #808080;
+    font-size: 14px;
+    line-height: 20px;
+  }
+</style>
