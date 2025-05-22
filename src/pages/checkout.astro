@@ -59,9 +59,9 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
           </div>
           <div class="options">
             <label class="option">
-              <input type="radio" name="payment" value="transfer" disabled />
+              <input type="radio" name="payment" value="transfer" checked />
               <div class="optionContent">
-                <div class="optionTitle">Transfer via Flip (Perbaikan)</div>
+                <div class="optionTitle">Transfer via Flip</div>
                 <div class="optionDesc">
                   Bayar lewat Flip, gampang dan cepat!
                 </div>
@@ -69,7 +69,7 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
             </label>
 
             <label class="option">
-              <input type="radio" name="payment" value="cash" checked />
+              <input type="radio" name="payment" value="cash" />
               <div class="optionContent">
                 <div class="optionTitle">Bayar tunai</div>
                 <div class="optionDesc">
@@ -465,7 +465,7 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
     static async handleCheckout() {
       if (!this.validate()) return;
 
-      const FLIP_REDIRECT_URL = "https://chechecakes.biz.id/payment/tf";
+      const FLIP_REDIRECT_URL = "https://beta.chechecakes.biz.id/payment/tf";
       const cust = this.saveCustomer();
 
       if (cust.paymentMethod === "transfer") {
