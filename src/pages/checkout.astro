@@ -465,7 +465,9 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
     static async handleCheckout() {
       if (!this.validate()) return;
 
-      const FLIP_REDIRECT_URL = "https://beta.chechecakes.biz.id/payment/tf";
+      const currentDomain = window.location.origin;
+      const FLIP_REDIRECT_URL = `${currentDomain}/payment/tf`;
+      console.log(FLIP_REDIRECT_URL);
       const cust = this.saveCustomer();
 
       if (cust.paymentMethod === "transfer") {
