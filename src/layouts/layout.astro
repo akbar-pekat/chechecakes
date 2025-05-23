@@ -71,13 +71,87 @@ import "@fontsource/instrument-sans/700.css";
     />
   </head>
   <body>
+    <!-- Sidebar Overlay -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <button id="close-sidebar" class="close-btn">
+          <svg
+            width="24"
+            height="25"
+            viewBox="0 0 24 25"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M19 3.5C19.5304 3.5 20.0391 3.71071 20.4142 4.08579C20.7893 4.46086 21 4.96957 21 5.5V19.5C21 20.0304 20.7893 20.5391 20.4142 20.9142C20.0391 21.2893 19.5304 21.5 19 21.5H5C4.46957 21.5 3.96086 21.2893 3.58579 20.9142C3.21071 20.5391 3 20.0304 3 19.5V5.5C3 4.96957 3.21071 4.46086 3.58579 4.08579C3.96086 3.71071 4.46957 3.5 5 3.5H19ZM19 5.5H16V19.5H19V5.5ZM14 5.5H5V19.5H14V5.5ZM7.793 9.672C7.96507 9.49968 8.1941 9.39606 8.43713 9.3806C8.68016 9.36513 8.92048 9.43888 9.113 9.588L9.207 9.672L11.328 11.792C11.5003 11.9641 11.6039 12.1931 11.6194 12.4361C11.6349 12.6792 11.5611 12.9195 11.412 13.112L11.328 13.207L9.208 15.328C9.02846 15.5093 8.78643 15.615 8.53145 15.6237C8.27647 15.6323 8.02783 15.5432 7.83642 15.3745C7.64501 15.2059 7.5253 14.9704 7.5018 14.7164C7.47829 14.4623 7.55278 14.2089 7.71 14.008L7.793 13.914L9.207 12.5L7.793 11.086C7.60553 10.8985 7.50021 10.6442 7.50021 10.379C7.50021 10.1138 7.60553 9.85953 7.793 9.672Z"
+              fill="black"></path>
+          </svg>
+        </button>
+      </div>
+      <nav class="sidebar-nav">
+        <ul>
+          <li><a href="/">🍩 Lihat menu</a></li>
+          <li><a href="/blog">🧁 Cerita manis</a></li>
+          <li><a href="/privacy">🔐 Privasi kamu aman</a></li>
+        </ul>
+      </nav>
+    </div>
+
     <main>
       <nav>
         <a href="/">
           <img src="/logo.png" alt="Cheche Cakes Logo" />
         </a>
+        <button id="menu-toggle" class="menu-toggle">
+          <svg
+            width="25"
+            height="25"
+            viewBox="0 0 25 25"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M19.5239 3.5C20.0544 3.5 20.5631 3.71071 20.9381 4.08579C21.3132 4.46086 21.5239 4.96957 21.5239 5.5V19.5C21.5239 20.0304 21.3132 20.5391 20.9381 20.9142C20.5631 21.2893 20.0544 21.5 19.5239 21.5H5.52393C4.99349 21.5 4.48478 21.2893 4.10971 20.9142C3.73464 20.5391 3.52393 20.0304 3.52393 19.5V5.5C3.52393 4.96957 3.73464 4.46086 4.10971 4.08579C4.48478 3.71071 4.99349 3.5 5.52393 3.5H19.5239ZM14.5239 5.5H5.52393V19.5H14.5239V5.5ZM19.5239 5.5H16.5239V19.5H19.5239V5.5ZM10.3169 9.672C10.4965 9.49075 10.7385 9.38497 10.9935 9.37632C11.2485 9.36767 11.4971 9.4568 11.6885 9.62547C11.8799 9.79413 11.9996 10.0296 12.0231 10.2836C12.0466 10.5377 11.9721 10.7911 11.8149 10.992L11.7309 11.086L10.3169 12.5L11.7309 13.914C11.9122 14.0935 12.018 14.3356 12.0266 14.5905C12.0353 14.8455 11.9461 15.0942 11.7775 15.2856C11.6088 15.477 11.3733 15.5967 11.1193 15.6202C10.8653 15.6437 10.6118 15.5692 10.4109 15.412L10.3169 15.328L8.19593 13.208C8.02375 13.0358 7.92032 12.8067 7.90504 12.5637C7.88976 12.3207 7.96367 12.0804 8.11293 11.888L8.19593 11.793L10.3169 9.672Z"
+              fill="black"></path>
+          </svg>
+        </button>
       </nav>
       <slot />
     </main>
+
+    <script>
+      // Sidebar functionality
+      const menuToggle = document.getElementById("menu-toggle");
+      const sidebar = document.getElementById("sidebar");
+      const sidebarOverlay = document.getElementById("sidebar-overlay");
+      const closeSidebar = document.getElementById("close-sidebar");
+
+      // Open sidebar
+      menuToggle?.addEventListener("click", () => {
+        sidebar?.classList.add("active");
+        sidebarOverlay?.classList.add("active");
+        document.body.style.overflow = "hidden";
+      });
+
+      // Close sidebar
+      const closeSidebarFunction = () => {
+        sidebar?.classList.remove("active");
+        sidebarOverlay?.classList.remove("active");
+        document.body.style.overflow = "auto";
+      };
+
+      closeSidebar?.addEventListener("click", closeSidebarFunction);
+      sidebarOverlay?.addEventListener("click", closeSidebarFunction);
+
+      // Close sidebar on escape key
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          closeSidebarFunction();
+        }
+      });
+    </script>
   </body>
 </html>

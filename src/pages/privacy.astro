@@ -1,0 +1,154 @@
+---
+import Layout from "../layouts/layout.astro";
+import Button from "../components/button.astro";
+---
+
+<Layout>
+  <div class="container">
+    <div class="finishCard" id="finishCardSuccess">
+      <h2>Kebijakan Privasi</h2>
+      <div class="description">
+        <strong>Penting buat kamu tahu:</strong>
+        <p>Kami di Cheche Cakes menjaga privasi kamu dengan sepenuh hati.</p>
+        <p>
+          Berikut ini penjelasan sederhana tentang bagaimana kami memproses
+          datamu.
+        </p>
+      </div>
+      <div class="description">
+        <h3>1. 📋 Data apa yang kami kumpulkan?</h3>
+        <p>Saat kamu memesan kue, kami meminta:</p>
+        <ul>
+          <li>Nama lengkap</li>
+          <li>Nomor HP (WhatsApp)</li>
+          <li>Alamat pengantaran</li>
+          <li>Metode pembayaran</li>
+        </ul>
+        <p>
+          Kami tidak menyimpan data ini secara permanen. Semua data hanya
+          digunakan untuk memproses pesanan dan dikirim ke admin via WhatsApp.
+        </p>
+      </div>
+      <div class="description">
+        <h3>2. 🔐 Keamanan data</h3>
+        <p>
+          Kami tidak menggunakan akun, login, atau database. Semua data hanya
+          disimpan sementara di perangkat kamu (browser), dan akan otomatis
+          dihapus setelah pesanan dikirim ke admin lewat WhatsApp.
+        </p>
+        <br />
+        <p>
+          Pembayaran dilakukan melalui <a
+            href="https://flip.id/kebijakan-privasi"
+            target="_blank">Flip, PT Fliptech Lentera Inspirasi Pertiwi</a
+          >, dan kami mengikuti kebijakan privasi dari pihak tersebut.
+        </p>
+      </div>
+      <div class="description">
+        <h3>3. 🚫 Tidak dijual atau dibagikan</h3>
+        <p>
+          Kami tidak akan pernah menjual, menyebarkan, atau membagikan datamu ke
+          pihak lain tanpa izin.
+        </p>
+      </div>
+      <div class="description">
+        <h3>4. 💬 Kalau ada pertanyaan</h3>
+        <p>
+          Kalau kamu ingin membatalkan pesanan atau mengubah datamu, tinggal
+          hubungi admin kami via WhatsApp atau email <a
+            href="mailto:help@chechecakes.biz.id">kami</a
+          >.
+        </p>
+      </div>
+      <div class="description">
+        <h3>5. 🔒 PSE Komdigi</h3>
+        <p>
+          Cheche Cakes sedang dalam proses pendaftaran PSE (Penyelenggara Sistem
+          Elektronik), sebagai wujud tanggung jawab kami untuk menjaga data kamu
+          dengan baik dan transparan.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .container {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: flex-start;
+      justify-content: flex-start;
+      align-self: stretch;
+      flex: 1;
+      position: relative;
+      overflow-y: scroll;
+    }
+
+    .container::-webkit-scrollbar {
+      display: none;
+    }
+
+    a {
+      color: #000000;
+    }
+
+    ul {
+      padding-left: 16px;
+      margin: 8px 0; /* pindahkan bullet + isi daftar 30px ke kanan */
+    }
+
+    .illust {
+      height: 100px;
+      -webkit-user-drag: none;
+      user-select: none;
+    }
+
+    .finishCard {
+      background: #ffffff;
+      border-radius: 4px;
+      border: 1px solid #000000;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      justify-content: flex-start;
+      align-self: stretch;
+      position: relative;
+    }
+
+    .finishCard h2 {
+      color: #000000;
+      text-align: center;
+      font-size: 20px;
+      line-height: 24px;
+      font-weight: 500;
+    }
+
+    .finishCard .description {
+      color: #000000;
+      text-align: left;
+      font-size: 16px;
+      line-height: 24px;
+      font-weight: 400;
+      margin: 4px 0;
+    }
+
+    .buttonGroup {
+      display: flex;
+      flex-direction: row;
+      gap: 8px;
+    }
+
+    .smallNote {
+      color: #808080;
+      text-align: center;
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 400;
+      position: relative;
+      align-self: stretch;
+    }
+  </style>
+</Layout>
