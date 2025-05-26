@@ -5,3 +5,5 @@ Disallow: /payment/tf
 Disallow: /payment/cod
 
 Allow: /
+
+Sitemap: https://chechecakes.biz.id/sitemap-index.xml
