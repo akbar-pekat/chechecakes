@@ -1,7 +1,7 @@
 ---
-import { getAllPosts, getPost } from "../../../lib/client";
-import Layout from "../../../layouts/layout.astro";
-import Button from "../../../components/button.astro";
+import { getAllPosts, getPost } from "../../lib/client";
+import Layout from "../../layouts/layout.astro";
+import Button from "../../components/button.astro";
 
 export const prerender = false;
 
@@ -17,7 +17,6 @@ export async function getStaticPaths() {
 const { slug } = Astro.params;
 const post = await getPost(slug);
 ---
-
 <Layout title={post.title}>
   <div class="container">
     <div class="blogHeader">
@@ -30,7 +29,7 @@ const post = await getPost(slug);
       <div class="meta">
         <div class="author">
           <img src="/thumbnail.jpg" alt="logoAuthor" class="authorImage" />
-          <span>Admin Cheche Cakes</span>
+          <span>Admin CC</span>
         </div>
         <div class="time">
           <span class="readTimeLabel">Waktu baca:</span>

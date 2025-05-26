@@ -3,7 +3,7 @@ import { getAllPosts } from "../../lib/client";
 import Layout from "../../layouts/layout.astro";
 import Button from "../../components/button.astro";
 
-export const prerender = true;
+export const prerender = false;
 
 const data = await getAllPosts();
 const allPosts = data.publication.posts.edges;
@@ -32,7 +32,7 @@ const hasPosts = allPosts.length > 0;
                       {post.node.readTimeInMinutes} menit
                     </span>
                   </div>
-                  <Button href={`/blog/p/${post.node.slug}`}>
+                  <Button href={`/blog/${post.node.slug}`}>
                     Baca selengkapnya
                   </Button>
                 </div>
