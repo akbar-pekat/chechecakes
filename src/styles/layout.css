@@ -93,9 +93,9 @@ nav img {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding: 20px;
-  border-bottom: 1px solid #000000;
-  background-color: #ffffff
+  padding: 12px 20px;
+  /* border-bottom: 1px solid #000000; */
+  background-color: #ffffff;
 }
 
 .sidebar-header img {
@@ -117,7 +117,7 @@ nav img {
 
 /* Sidebar Navigation */
 .sidebar-nav {
-  padding: 20px 0;
+  padding: 0;
 }
 
 .sidebar-nav ul {
@@ -145,4 +145,29 @@ nav img {
   background-color: #00000006;
   color: #000000;
   border-left-color: #cc9543;
+}
+
+.sidebar .spacer {
+  width: 100%;
+  height: 70%;
+  display: flex;
+  flex: 1;
+}
+
+.sidebar footer {
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sidebar footer a {
+  font-size: 14px;
+  line-height: 16px;
+  color: #00000080;
+  text-decoration: none;
+}
+
+.emptyObject {
+  width: 40px;
 }
