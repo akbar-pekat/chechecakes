@@ -45,6 +45,9 @@ nav img {
   padding: 8px;
   border-radius: 4px;
   transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .menu-toggle:hover {
