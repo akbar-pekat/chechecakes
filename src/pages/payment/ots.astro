@@ -1,0 +1,272 @@
+---
+import Layout from "../../layouts/layout.astro";
+import Button from "../../components/button.astro";
+import Input from "../../components/input.astro";
+
+import "../../styles/checkout.css";
+import "../../styles/button.css";
+
+const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
+---
+
+<Layout>
+  <div class="container">
+    <div id="formCustomer" class="formCustomer">
+      <div class="containerForm">
+        <Input
+          label="Nama lengkap"
+          instruction="Isi nama pembeli ya, biar mudah pas pendataan."
+          placeholder="Ketik nama lengkap"
+          id="namalengkap"
+          type="text"
+        />
+
+        <Input
+          label="Nominal pembayaran"
+          instruction="Masukkan total nominal yang harus dibayar."
+          placeholder="0"
+          id="nominal"
+          type="text"
+        />
+
+        <div class="customOptions">
+          <div class="header">
+            <div class="optionLabel">Metode bayar</div>
+          </div>
+          <div class="options">
+            <label class="option">
+              <input type="radio" name="payment" value="transfer" checked />
+              <div class="optionContent">
+                <div class="optionTitle">Transfer via Flip</div>
+                <div class="optionDesc">
+                  Bayar lewat Flip, gampang, aman dan cepat!
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="summaryCart">
+      <div class="totalContainer">
+        <div class="label">Total</div>
+        <div class="valueBig" id="totalValue">Rp0</div>
+      </div>
+      <Button style="block" id="checkoutButton">Buat Link Pembayaran</Button>
+
+      <div id="paymentLink" style="display: none; margin-top: 20px;">
+        <div class="paymentLinkContainer">
+          <div class="paymentLinkLabel">Link Pembayaran:</div>
+          <div class="paymentLinkValue" id="paymentLinkValue"></div>
+          <div class="paymentLinkActions">
+            <Button id="copyButton" style="outline">Salin Link</Button>
+            <Button id="shareButton" style="outline">Bagikan</Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .paymentLinkLabel {
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .paymentLinkValue {
+    word-break: break-all;
+    background: white;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+  }
+
+  .paymentLinkActions {
+    display: flex;
+    gap: 10px;
+  }
+</style>
+
+<script type="module" define:vars={{ FLIP_API_KEY }}>
+  class CheckoutController {
+    static init() {
+      this.el = {
+        formCustomer: document.getElementById("formCustomer"),
+        summary: document.querySelector(".summaryCart"),
+        totalVal: document.getElementById("totalValue"),
+        checkoutBtn: document.getElementById("checkoutButton"),
+        noteTotal: document.getElementById("noteTotal"),
+        nominalInput: document.getElementById("nominal"),
+        // addressInput: document.getElementById("alamatlengkap"),
+        paymentLink: document.getElementById("paymentLink"),
+        paymentLinkValue: document.getElementById("paymentLinkValue"),
+        copyButton: document.getElementById("copyButton"),
+        shareButton: document.getElementById("shareButton"),
+      };
+
+      // Set default value untuk alamat
+      //   this.el.addressInput.value = "Diantar ke lokasi";
+      //   this.el.addressInput.disabled = true;
+
+      this.el.checkoutBtn?.addEventListener("click", (e) => {
+        e.preventDefault();
+        this.handleCheckout();
+      });
+
+      this.el.nominalInput?.addEventListener("input", () => {
+        const value = this.el.nominalInput.value.replace(/\D/g, "");
+        this.el.nominalInput.value = value;
+        this.el.totalVal.textContent = `Rp${Number(value).toLocaleString("id-ID")}`;
+      });
+
+      this.el.copyButton?.addEventListener("click", () => {
+        const text = this.el.paymentLinkValue.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          alert("Link berhasil disalin!");
+        });
+      });
+
+      this.el.shareButton?.addEventListener("click", async () => {
+        const text = this.el.paymentLinkValue.textContent;
+        try {
+          await navigator.share({
+            title: "Link Pembayaran",
+            text: "Silakan lakukan pembayaran melalui link berikut:",
+            url: text,
+          });
+        } catch (err) {
+          console.error("Error sharing:", err);
+          alert("Gagal membagikan link. Silakan salin manual.");
+        }
+      });
+    }
+
+    static validate() {
+      let ok = true;
+      let firstField = null;
+
+      const nameInp = document.getElementById("namalengkap");
+      const nameErr = nameInp.parentElement.querySelector(".errorText");
+      if (nameInp.value.trim().length < 3) {
+        nameErr.textContent = "Nama lengkap minimal 3 karakter";
+        nameErr.style.display = "block";
+        ok = false;
+        firstField = firstField || nameInp;
+      } else {
+        nameErr.style.display = "none";
+      }
+
+      const nominalInp = document.getElementById("nominal");
+      const nominalErr = nominalInp.parentElement.querySelector(".errorText");
+      if (!nominalInp.value || Number(nominalInp.value) <= 0) {
+        nominalErr.textContent = "Nominal harus lebih dari 0";
+        nominalErr.style.display = "block";
+        ok = false;
+        firstField = firstField || nominalInp;
+      } else {
+        nominalErr.style.display = "none";
+      }
+
+      if (!ok && firstField) {
+        firstField.scrollIntoView({ behavior: "smooth", block: "center" });
+        firstField.focus();
+      }
+
+      return ok;
+    }
+
+    static saveCustomer() {
+      const name = window.getInputValue("namalengkap");
+      const nominal = Number(window.getInputValue("nominal"));
+      const ts = new Date().toISOString();
+      const orderId = `${name.replace(/\s+/g, "").toUpperCase()}${Date.now()}`;
+
+      const data = {
+        name,
+        paymentMethod: "transfer",
+        timestamp: ts,
+        orderId,
+        total: nominal,
+      };
+      localStorage.setItem("customerData", JSON.stringify(data));
+      return data;
+    }
+
+    static async handleCheckout() {
+      if (!this.validate()) return;
+
+      const currentDomain = window.location.origin;
+      const FLIP_REDIRECT_URL = `${currentDomain}/payment/tf`;
+      const cust = this.saveCustomer();
+
+      try {
+        const form = new URLSearchParams({
+          title: `Pembayaran ${cust.orderId}`,
+          type: "SINGLE",
+          amount: cust.total,
+          // redirect_url: FLIP_REDIRECT_URL,
+          is_address_required: "0",
+          is_phone_number_required: "0",
+          step: "2",
+          sender_name: cust.name,
+          sender_email: "customer@chechecakes.biz.id",
+          sender_address: "Diantar ke lokasi",
+        });
+
+        const resp = await fetch(
+          "https://bigflip.id/big_sandbox_api/v2/pwf/bill",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              Accept: "application/json",
+              Authorization: `Basic ${FLIP_API_KEY}`,
+            },
+            body: form,
+          }
+        );
+
+        const result = await resp.json();
+        console.log("Flip API:", result);
+
+        const raw =
+          result.link_url ??
+          result.data?.link_url ??
+          result.data?.payment?.link_url;
+        const linkId =
+          result.link_id ??
+          result.data?.link_id ??
+          result.data?.payment?.link_id;
+
+        if (!raw || !linkId) {
+          console.error("Flip response missing link_url or link_id:", result);
+          alert("Gagal mendapatkan data pembayaran.");
+          return;
+        }
+
+        const url = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+
+        // Tampilkan link pembayaran
+        this.el.paymentLinkValue.textContent = url;
+        this.el.paymentLink.style.display = "block";
+        this.el.paymentLink.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      } catch (err) {
+        console.error(err);
+        alert("Gagal memproses pembayaran. Silakan coba lagi.");
+      }
+    }
+  }
+
+  CheckoutController.init();
+
+  if (prompt("Masukkan PIN kurir:") !== "win122307") {
+    alert("Akses ditolak");
+    window.location.href = "/";
+  }
+</script>

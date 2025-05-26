@@ -1,0 +1,238 @@
+---
+import Layout from "../layouts/layout.astro";
+import Button from "../components/button.astro";
+---
+
+<Layout>
+  <div class="container">
+    <div class="finishCard" id="finishCardSuccess">
+      <h2>Syarat & Ketentuan</h2>
+      <div class="description">
+        <p>
+          Halaman ini menjelaskan syarat dan ketentuan yang mengatur penggunaan
+          situs web Cheche Cakes oleh pengguna. Dengan mengakses dan menggunakan
+          situs ini, Anda dianggap telah membaca, memahami, dan menyetujui
+          seluruh ketentuan di bawah ini.
+        </p>
+      </div>
+      <div class="description">
+        <h3>1. Tentang Cheche Cakes</h3>
+        <p>
+          Cheche Cakes adalah usaha rumahan yang menyediakan produk makanan
+          berupa kue dan donat, dengan sistem pemesanan secara daring melalui
+          website dan pengiriman detail pesanan ke admin via WhatsApp.
+          Pembayaran dapat dilakukan melalui metode Cash on Delivery (COD) atau
+          melalui pihak ketiga (Flip Payment Gateway).
+        </p>
+      </div>
+      <div class="description">
+        <h3>2. Penggunaan Situs</h3>
+        <ul>
+          <li>
+            Situs ini hanya boleh digunakan untuk keperluan melihat produk,
+            melakukan pemesanan, dan mengirim pesanan ke WhatsApp admin.
+          </li>
+          <li>
+            Pengguna dilarang melakukan akses atau aktivitas yang dapat merusak,
+            membebani, atau mengganggu sistem.
+          </li>
+        </ul>
+      </div>
+      <div class="description">
+        <h3>3. Pemesanan</h3>
+        <ul>
+          <li>
+            Pengguna dapat memilih produk, mengisi formulir pemesanan, dan
+            mengirimkannya ke admin melalui tombol WhatsApp.
+          </li>
+          <li>
+            Semua data yang dimasukkan bersifat sementara dan tidak disimpan
+            secara permanen oleh sistem.
+          </li>
+          <li>
+            Pemesanan dianggap sah setelah dikonfirmasi oleh admin melalui
+            WhatsApp.
+          </li>
+        </ul>
+      </div>
+      <div class="description">
+        <h3>4. Pembayaran</h3>
+        <ul>
+          <li>
+            Pembayaran tersedia dalam dua metode: COD (tunai saat terima barang)
+            atau transfer via Flip.
+          </li>
+          <li>
+            Biaya tambahan dari pihak ketiga (seperti biaya admin bank/e-wallet)
+            ditanggung oleh pembeli.
+          </li>
+          <li>
+            Jika terjadi masalah pada pembayaran, pengguna dapat menghubungi
+            admin atau pihak Flip sesuai prosedur mereka.
+          </li>
+        </ul>
+      </div>
+      <div class="description">
+        <h3>5. Data Pribadi</h3>
+        <ul>
+          <li>
+            Cheche Cakes mengumpulkan data (nama, nomor telepon, alamat, metode
+            bayar) hanya untuk keperluan pemrosesan pesanan.
+          </li>
+          <li>
+            Data dikirim melalui WhatsApp dan tidak disimpan di server atau
+            database internal.
+          </li>
+          <li>
+            Informasi lebih lanjut dapat dibaca di <a href="/privacy"
+              >Kebijakan Privasi</a
+            >.
+          </li>
+        </ul>
+      </div>
+      <div class="description">
+        <h3>6. Batal & Perubahan Pesanan</h3>
+        <ul>
+          <li>
+            Pembatalan atau perubahan pesanan hanya dapat dilakukan dengan
+            menghubungi admin melalui WhatsApp sebelum pesanan diproses.
+          </li>
+          <li>
+            Setelah pesanan dikirim atau diproduksi, pembatalan tidak dapat
+            dilakukan.
+          </li>
+        </ul>
+      </div>
+      <div class="description">
+        <h3>7. Keterbatasan Tanggung Jawab</h3>
+        <ul>
+          <li>
+            Cheche Cakes tidak bertanggung jawab atas kesalahan yang terjadi
+            akibat pengguna mengakses halaman konfirmasi secara langsung tanpa
+            menyelesaikan proses pemesanan.
+          </li>
+          <li>
+            Kami juga tidak bertanggung jawab atas kegagalan pengiriman jika
+            informasi yang diberikan oleh pengguna tidak lengkap atau tidak
+            akurat.
+          </li>
+        </ul>
+      </div>
+      <div class="description">
+        <h3>8. Status Hukum</h3>
+        <ul>
+          <li>
+            Cheche Cakes telah terdaftar resmi sebagai Penyelenggara Sistem
+            Elektronik (PSE) Kominfo dengan nomor registrasi:
+            023789.1/DJAI.PSE/05/2025.
+          </li>
+        </ul>
+      </div>
+      <div class="description">
+        <h3>9. Perubahan Syarat & Ketentuan</h3>
+        <ul>
+          <li>
+            Cheche Cakes telah terdaftar resmi sebagai Penyelenggara Sistem
+            Elektronik (PSE) Kominfo dengan nomor registrasi:
+            <strong>023789.1/DJAI.PSE/05/2025</strong>.
+          </li>
+        </ul>
+      </div>
+      <hr />
+      <div class="description">
+        <p>
+          Jika Anda tidak menyetujui salah satu bagian dari ketentuan ini, harap
+          untuk tidak melakukan pemesanan melalui situs Cheche Cakes.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .container {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: flex-start;
+      justify-content: flex-start;
+      align-self: stretch;
+      flex: 1;
+      position: relative;
+      overflow-y: scroll;
+    }
+
+    .container::-webkit-scrollbar {
+      display: none;
+    }
+
+    a {
+      color: #000000;
+    }
+
+    ul {
+      padding-left: 16px;
+      margin: 8px 0; /* pindahkan bullet + isi daftar 30px ke kanan */
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background-color: #000000;
+      width: 100%;
+    }
+
+    .illust {
+      height: 100px;
+      -webkit-user-drag: none;
+      user-select: none;
+    }
+
+    .finishCard {
+      background: #ffffff;
+      border-radius: 4px;
+      border: 1px solid #000000;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      justify-content: flex-start;
+      align-self: stretch;
+      position: relative;
+    }
+
+    .finishCard h2 {
+      color: #000000;
+      text-align: center;
+      font-size: 20px;
+      line-height: 24px;
+      font-weight: 500;
+    }
+
+    .finishCard .description {
+      color: #000000;
+      text-align: left;
+      font-size: 16px;
+      line-height: 24px;
+      font-weight: 400;
+      margin: 4px 0;
+    }
+
+    .buttonGroup {
+      display: flex;
+      flex-direction: row;
+      gap: 8px;
+    }
+
+    .smallNote {
+      color: #808080;
+      text-align: center;
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 400;
+      position: relative;
+      align-self: stretch;
+    }
+  </style>
+</Layout>
