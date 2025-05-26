@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /payment
+Disallow: /payment/ots
+Disallow: /payment/tf
+Disallow: /payment/cod
+
+Allow: /
