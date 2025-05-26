@@ -19,22 +19,24 @@ import "@fontsource/instrument-sans/700.css";
   <head>
     <!-- Google Tag Manager -->
     <script>
-      (function (w, d, s, l, i) {
+      (function (w: Window, d: Document, s: string, l: string, i: string) {
         (w as any)[l] = (w as any)[l] || [];
-        ((w as any)[l] as any[]).push({
+        (w as any)[l].push({
           "gtm.start": new Date().getTime(),
           event: "gtm.js",
         });
         var f = d.getElementsByTagName(s)[0],
           j = d.createElement(s),
-          dl = l != "dataLayer" ? "&l=" + l : "";
-        (j as HTMLScriptElement).async = true;
+          dl = l !== "dataLayer" ? "&l=" + l : "";
+        j.setAttribute("async", "true");
+        j.setAttribute(
+          "src",
+          "https://www.googletagmanager.com/gtm.js?id=" + i + dl
+        );
         if (f.parentNode) {
-          (j as HTMLScriptElement).src =
-            "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+          f.parentNode.insertBefore(j, f);
         }
-        f.parentNode?.insertBefore(j, f);
-      })(window, document, "script", "dataLayer", "GTM-N5VXN3T5");
+      })(window, document, "script", "dataLayer", "GTM-WD3TFNC6");
     </script>
     <!-- End Google Tag Manager -->
 
@@ -93,26 +95,14 @@ import "@fontsource/instrument-sans/700.css";
   </head>
   <body>
     <!-- Google Tag Manager (noscript) -->
-    <noscript>
-      <iframe
-        src="https://www.googletagmanager.com/ns.html?id=GTM-N5VXN3T5"
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-WD3TFNC6"
         height="0"
         width="0"
-        style="display:none;visibility:hidden"></iframe>
-    </noscript>
+        style="display:none;visibility:hidden"></iframe></noscript
+    >
     <!-- End Google Tag Manager (noscript) -->
-
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1MTFRDQ5Y4"
-    ></script>
-    <script>
-      (window as any).dataLayer = (window as any).dataLayer || [];
-      function gtag() {
-        ((window as any).dataLayer as any[]).push(arguments);
-      }
-      (window as any).gtag("js", new Date());
-      (window as any).gtag("config", "G-1MTFRDQ5Y4");
-    </script>
 
     <!-- Sidebar Overlay -->
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
@@ -141,6 +131,8 @@ import "@fontsource/instrument-sans/700.css";
           <li><a href="/privacy">🔐 Privasi kamu aman</a></li>
         </ul>
       </nav>
+      <div class="spacer"></div>
+      <footer>sadas</footer>
     </div>
 
     <main>
