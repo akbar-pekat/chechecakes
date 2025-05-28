@@ -1,0 +1,148 @@
+---
+import Layout from "../layouts/layout.astro";
+import Button from "../components/button.astro";
+---
+
+<Layout>
+  <div class="container">
+    <div class="finishCard" id="finishCardSuccess">
+      <h2>Kebijakan Refund</h2>
+      <div class="description">
+        <p>
+          Terima kasih sudah mempercayakan momen manismu ke Cheche Cakes 🍰.
+          <br />
+          Kami ingin menjelaskan dengan jujur dan terbuka soal kebijakan refund di
+          toko kami.
+        </p>
+      </div>
+      <div class="description">
+        <h3>1. Produk Kami Bersifat Made-to-Order</h3>
+        <p>
+          Semua kue dan donat dari Cheche Cakes dibuat secara khusus sesuai
+          pesanan, tidak disimpan dalam stok, dan langsung diproses setelah kamu
+          melakukan pemesanan. Karena itu, kami tidak menyediakan opsi refund
+          atau pengembalian dana dalam kondisi:
+        </p>
+        <ul>
+          <li>Pesanan sudah diproses</li>
+          <li>Pesanan sudah dikirim</li>
+          <li>Perubahan pikiran atau kesalahan pemesanan oleh pelanggan</li>
+        </ul>
+        <p>
+          Data ini dikumpulkan untuk keperluan pemrosesan transaksi dan
+          pengiriman pesanan.
+        </p>
+      </div>
+      <div class="description">
+        <h3>2. Jika Terjadi Kesalahan dari Pihak Kami</h3>
+        <p>
+          Kami sangat menjaga kualitas dan ketepatan pesanan. Namun jika kamu
+          menerima pesanan yang:
+        </p>
+        <ul>
+          <li>Tidak sesuai dengan yang kamu pesan</li>
+          <li>Dalam kondisi rusak parah saat sampai</li>
+        </ul>
+        <p>
+          Silakan hubungi admin kami maksimal 1x24 jam setelah pesanan diterima,
+          lewat WhatsApp Admin.
+        </p>
+      </div>
+      <div class="description">
+        <h3>3. Pernyataan Persetujuan</h3>
+        <p>
+          Dengan melakukan pemesanan melalui situs Cheche Cakes, pengguna
+          dianggap telah membaca, memahami, dan menyetujui kebijakan refund ini.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .container {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: flex-start;
+      justify-content: flex-start;
+      align-self: stretch;
+      flex: 1;
+      position: relative;
+      overflow-y: scroll;
+    }
+
+    .container::-webkit-scrollbar {
+      display: none;
+    }
+
+    a {
+      color: #000000;
+    }
+
+    ul {
+      padding-left: 16px;
+      margin: 8px 0; /* pindahkan bullet + isi daftar 30px ke kanan */
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background-color: #000000;
+      width: 100%;
+    }
+
+    .illust {
+      height: 100px;
+      -webkit-user-drag: none;
+      user-select: none;
+    }
+
+    .finishCard {
+      background: #ffffff;
+      border-radius: 4px;
+      border: 1px solid #000000;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      justify-content: flex-start;
+      align-self: stretch;
+      position: relative;
+    }
+
+    .finishCard h2 {
+      color: #000000;
+      text-align: center;
+      font-size: 20px;
+      line-height: 24px;
+      font-weight: 500;
+    }
+
+    .finishCard .description {
+      color: #000000;
+      text-align: left;
+      font-size: 16px;
+      line-height: 24px;
+      font-weight: 400;
+      margin: 4px 0;
+    }
+
+    .buttonGroup {
+      display: flex;
+      flex-direction: row;
+      gap: 8px;
+    }
+
+    .smallNote {
+      color: #808080;
+      text-align: center;
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 400;
+      position: relative;
+      align-self: stretch;
+    }
+  </style>
+</Layout>

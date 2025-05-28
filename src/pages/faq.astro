@@ -1,0 +1,139 @@
+---
+import Layout from "../layouts/layout.astro";
+import Button from "../components/button.astro";
+---
+
+<Layout>
+  <div class="container">
+    <div class="finishCard" id="finishCardSuccess">
+      <h2>FAQ – Pertanyaan yang Sering Ditanyain</h2>
+      <div class="description">
+        <br />
+        <h3>Gimana cara pesannya di Cheche Cakes?</h3>
+        <p>
+          Gampang banget! Tinggal pilih kue yang kamu suka, masukin ke
+          keranjang, isi form pengiriman, pilih metode bayar, lalu klik kirim ke
+          WhatsApp. Admin kami akan bantu prosesin pesanan kamu~
+        </p>
+      </div>
+      <div class="description">
+        <h3>Apa bisa pesen tanpa WhatsApp?</h3>
+        <p>
+          Untuk sekarang, pemesanan dilakukan lewat WhatsApp ya, supaya proses
+          konfirmasi dan pengantaran lebih cepat dan jelas.
+        </p>
+      </div>
+      <div class="description">
+        <h3>Bisa bayar pakai apa aja?</h3>
+        <p>Ada dua pilihan:</p>
+        <ul>
+          <li>Bayar Tunai (COD) pas pesanan sampai</li>
+          <li>Transfer via Flip (link akan muncul setelah checkout)</li>
+        </ul>
+      </div>
+      <div class="description">
+        <h3>Cheche Cakes bisa antar ke mana aja?</h3>
+        <p>
+          Ada dua pilihan:Saat ini pengantaran hanya tersedia untuk area Sumbawa
+          Besar, NTB, dan sekitarnya. Tapi kamu juga bisa pilih opsi Ambil
+          Sendiri di toko, lho!
+        </p>
+      </div>
+      <div class="description">
+        <h3>Bisa batalin pesanan?</h3>
+        <p>
+          Bisa, asal belum diproses. Segera hubungi admin lewat WA kalau mau
+          batal ya~
+        </p>
+      </div>
+    </div>
+
+    <style>
+      .container {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        align-items: flex-start;
+        justify-content: flex-start;
+        align-self: stretch;
+        flex: 1;
+        position: relative;
+        overflow-y: scroll;
+      }
+
+      .container::-webkit-scrollbar {
+        display: none;
+      }
+
+      a {
+        color: #000000;
+      }
+
+      ul {
+        padding-left: 16px;
+        margin: 8px 0; /* pindahkan bullet + isi daftar 30px ke kanan */
+      }
+
+      hr {
+        border: none;
+        height: 1px;
+        background-color: #000000;
+        width: 100%;
+      }
+
+      .illust {
+        height: 100px;
+        -webkit-user-drag: none;
+        user-select: none;
+      }
+
+      .finishCard {
+        background: #ffffff;
+        border-radius: 4px;
+        border: 1px solid #000000;
+        padding: 32px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        align-items: center;
+        justify-content: flex-start;
+        align-self: stretch;
+        position: relative;
+      }
+
+      .finishCard h2 {
+        color: #000000;
+        text-align: center;
+        font-size: 20px;
+        line-height: 24px;
+        font-weight: 500;
+      }
+
+      .finishCard .description {
+        color: #000000;
+        text-align: left;
+        font-size: 16px;
+        line-height: 24px;
+        font-weight: 400;
+        margin: 4px 0;
+      }
+
+      .buttonGroup {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+      }
+
+      .smallNote {
+        color: #808080;
+        text-align: center;
+        font-size: 12px;
+        line-height: 16px;
+        font-weight: 400;
+        position: relative;
+        align-self: stretch;
+      }
+    </style>
+  </div>
+</Layout>

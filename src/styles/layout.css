@@ -152,15 +152,16 @@ nav img {
 
 .sidebar .spacer {
   width: 100%;
-  height: 70%;
+  height: 62%;
   display: flex;
   flex: 1;
 }
 
 .sidebar footer {
   padding: 16px;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
   gap: 12px;
 }
 
