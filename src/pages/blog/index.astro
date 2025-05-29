@@ -3,7 +3,7 @@ import { getAllPosts } from "../../lib/client";
 import Layout from "../../layouts/layout.astro";
 import Button from "../../components/button.astro";
 
-export const prerender = false;
+// export const prerender = false;
 
 const data = await getAllPosts();
 const allPosts = data.publication.posts.edges;
