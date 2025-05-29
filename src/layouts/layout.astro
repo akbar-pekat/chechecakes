@@ -48,6 +48,7 @@ import "@fontsource/instrument-sans/700.css";
     <meta name="theme-color" content="#351500" />
     <meta name="generator" content={Astro.generator} />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <meta
       name="description"
       content="Pesan aneka kue rumahan langsung via WhatsApp dari Cheche Cakes - toko kue di Sumbawa Besar, NTB. Praktis, manis, dan personal!"
@@ -183,8 +184,83 @@ import "@fontsource/instrument-sans/700.css";
         </button>
       </nav>
       <slot />
+      <button
+        id="install-button"
+        class="button"
+        style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 1000;"
+      >
+        📲 Install biar gak buka browser terus~
+      </button>
     </main>
 
+    <script>
+      let deferredPrompt: any;
+      let installButton: HTMLElement | null;
+
+      window.addEventListener("beforeinstallprompt", (e) => {
+        // Prevent default browser install prompt
+        e.preventDefault();
+
+        // Store the event for later use
+        deferredPrompt = e;
+
+        // Show custom install button
+        installButton = document.getElementById("install-button");
+        if (installButton) {
+          installButton.style.display = "block";
+        }
+      });
+
+      // Handle custom install button click
+      function handleInstallClick() {
+        if (deferredPrompt) {
+          // Show install prompt
+          deferredPrompt.prompt();
+
+          // Wait for user response
+          deferredPrompt.userChoice.then(
+            (choiceResult: { outcome: string }) => {
+              if (choiceResult.outcome === "accepted") {
+                console.log("User accepted install");
+              } else {
+                console.log("User dismissed install");
+              }
+              deferredPrompt = null;
+            }
+          );
+        }
+      }
+
+      // Add click event listener
+      document.addEventListener("DOMContentLoaded", () => {
+        const button = document.getElementById("install-button");
+        if (button) {
+          button.addEventListener("click", handleInstallClick);
+        }
+      });
+
+      // Hide install button after app is installed
+      window.addEventListener("appinstalled", (evt) => {
+        console.log("App installed successfully");
+        if (installButton) {
+          installButton.style.display = "none";
+        }
+      });
+    </script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/sw.js", { scope: "/" })
+            .then((registration) => {
+              console.log("SW registered: ", registration);
+            })
+            .catch((registrationError) => {
+              console.log("SW registration failed: ", registrationError);
+            });
+        });
+      }
+    </script>
     <script>
       const menuToggle = document.getElementById("menu-toggle");
       const sidebar = document.getElementById("sidebar");
