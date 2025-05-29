@@ -7,66 +7,111 @@ import "../../styles/checkout.css";
 import "../../styles/button.css";
 
 const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
+const COURIER_PIN = import.meta.env.COURIER_PIN;
+
+let isAuthenticated = false;
+// let authError = "";
+
+if (Astro.request.method === "POST") {
+  try {
+    const formData = await Astro.request.formData();
+    const submittedPin = formData.get("pin");
+
+    if (submittedPin === COURIER_PIN) {
+      isAuthenticated = true;
+    }
+  } catch (error) {}
+}
 ---
 
 <Layout>
-  <div class="container">
-    <div id="formCustomer" class="formCustomer">
-      <div class="containerForm">
-        <Input
-          label="Nama lengkap"
-          instruction="Isi nama pembeli ya, biar mudah pas pendataan."
-          placeholder="Ketik nama lengkap"
-          id="namalengkap"
-          type="text"
-        />
-
-        <Input
-          label="Nominal pembayaran"
-          instruction="Masukkan total nominal yang harus dibayar."
-          placeholder="0"
-          id="nominal"
-          type="text"
-        />
-
-        <div class="customOptions">
-          <div class="header">
-            <div class="optionLabel">Metode bayar</div>
+  {
+    !isAuthenticated ? (
+      <div class="container">
+        <div class="formCustomer">
+          <div class="containerForm">
+            <form method="POST">
+              <Input
+                label="PIN Kurir"
+                instruction="Masukkan PIN untuk mengakses halaman ini."
+                placeholder="Masukkan PIN"
+                id="pin"
+                type="password"
+                name="pin"
+              />
+              <Button style="primary">Verifikasi</Button>
+            </form>
           </div>
-          <div class="options">
-            <label class="option">
-              <input type="radio" name="payment" value="transfer" checked />
-              <div class="optionContent">
-                <div class="optionTitle">Transfer via Flip</div>
-                <div class="optionDesc">
-                  Bayar lewat Flip, gampang, aman dan cepat!
-                </div>
+        </div>
+      </div>
+    ) : (
+      <div class="container">
+        <div id="formCustomer" class="formCustomer">
+          <div class="containerForm">
+            <Input
+              label="Nama lengkap"
+              instruction="Isi nama pembeli ya, biar mudah pas pendataan."
+              placeholder="Ketik nama lengkap"
+              id="namalengkap"
+              type="text"
+            />
+
+            <Input
+              label="Nominal pembayaran"
+              instruction="Masukkan total nominal yang harus dibayar."
+              placeholder="0"
+              id="nominal"
+              type="text"
+            />
+
+            <div class="customOptions">
+              <div class="header">
+                <div class="optionLabel">Metode bayar</div>
               </div>
-            </label>
+              <div class="options">
+                <label class="option">
+                  <input type="radio" name="payment" value="transfer" checked />
+                  <div class="optionContent">
+                    <div class="optionTitle">Transfer via Flip</div>
+                    <div class="optionDesc">
+                      Bayar lewat Flip, gampang, aman dan cepat!
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="summaryCart">
+          <div class="totalContainer">
+            <div class="label">Total</div>
+            <div class="valueBig" id="totalValue">
+              Rp0
+            </div>
+          </div>
+          <Button style="block" id="checkoutButton">
+            Buat Link Pembayaran
+          </Button>
+
+          <div id="paymentLink" style="display: none; margin-top: 20px;">
+            <div class="paymentLinkContainer">
+              <div class="paymentLinkLabel">Link Pembayaran:</div>
+              <div class="paymentLinkValue" id="paymentLinkValue" />
+              <div class="paymentLinkActions">
+                <Button id="copyButton" style="outline">
+                  Salin Link
+                </Button>
+                <Button id="shareButton" style="outline">
+                  Bagikan
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-
-    <div class="summaryCart">
-      <div class="totalContainer">
-        <div class="label">Total</div>
-        <div class="valueBig" id="totalValue">Rp0</div>
-      </div>
-      <Button style="block" id="checkoutButton">Buat Link Pembayaran</Button>
-
-      <div id="paymentLink" style="display: none; margin-top: 20px;">
-        <div class="paymentLinkContainer">
-          <div class="paymentLinkLabel">Link Pembayaran:</div>
-          <div class="paymentLinkValue" id="paymentLinkValue"></div>
-          <div class="paymentLinkActions">
-            <Button id="copyButton" style="outline">Salin Link</Button>
-            <Button id="shareButton" style="outline">Bagikan</Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+    )
+  }
 </Layout>
 
 <style>
@@ -87,6 +132,18 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
   .paymentLinkActions {
     display: flex;
     gap: 10px;
+  }
+
+  .error {
+    color: red;
+    margin-bottom: 15px;
+    font-weight: 500;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
   }
 </style>
 
@@ -264,9 +321,4 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
   }
 
   CheckoutController.init();
-
-  if (prompt("Masukkan PIN kurir:") !== "win122307") {
-    alert("Akses ditolak");
-    window.location.href = "/";
-  }
 </script>
