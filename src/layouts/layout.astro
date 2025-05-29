@@ -134,8 +134,8 @@ import "@fontsource/instrument-sans/700.css";
       <div class="spacer"></div>
       <footer>
         <a href="/payment/ots" class="footerLink">Payment OTS</a>
-        <a href="/privacy" class="footerLink">Kebijakan Privasi</a>
         <a href="/tnc" class="footerLink">Syarat & Ketentuan</a>
+        <a href="/privacy" class="footerLink">Kebijakan Privasi</a>
         <a href="/refund" class="footerLink">Kebijakan Refund</a>
         <a href="/faq" class="footerLink">FAQ</a>
       </footer>
@@ -185,20 +185,17 @@ import "@fontsource/instrument-sans/700.css";
     </main>
 
     <script>
-      // Sidebar functionality
       const menuToggle = document.getElementById("menu-toggle");
       const sidebar = document.getElementById("sidebar");
       const sidebarOverlay = document.getElementById("sidebar-overlay");
       const closeSidebar = document.getElementById("close-sidebar");
 
-      // Open sidebar
       menuToggle?.addEventListener("click", () => {
         sidebar?.classList.add("active");
         sidebarOverlay?.classList.add("active");
         document.body.style.overflow = "hidden";
       });
 
-      // Close sidebar
       const closeSidebarFunction = () => {
         sidebar?.classList.remove("active");
         sidebarOverlay?.classList.remove("active");
