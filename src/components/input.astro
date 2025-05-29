@@ -4,8 +4,9 @@ interface Props {
   instruction: string;
   placeholder: string;
   id: string;
-  type?: "text" | "tel" | "email";
+  type?: "text" | "tel" | "email" | "password";
   minLength?: number;
+  name?: string;
 }
 
 const {
@@ -19,6 +20,7 @@ const {
     : type === "text" && id === "alamatlengkap"
       ? 10
       : 3,
+  name,
 } = Astro.props;
 
 import "../styles/input.css";
@@ -37,6 +39,7 @@ import "../styles/input.css";
     pattern={type === "tel" ? "[0-9]*" : undefined}
     inputmode={type === "tel" ? "numeric" : undefined}
     minlength={minLength.toString()}
+    name={name}
   />
   <div class="errorText" id={`${id}-error`} style="display: none;"></div>
 </div>
