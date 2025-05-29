@@ -150,7 +150,7 @@ import "../styles/input.css";
 
       // Format nomor telepon saat mengetik
       if (inputElement.type === "tel") {
-        inputElement.addEventListener("input", (e) => {
+        inputElement.addEventListener("input", () => {
           let value = inputElement.value;
 
           // Izinkan input + di awal

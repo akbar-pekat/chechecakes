@@ -20,12 +20,13 @@ import "@fontsource/instrument-sans/700.css";
     <!-- Google Tag Manager -->
     <script>
       (function (w: Window, d: Document, s: string, l: string, i: string) {
-        (w as any)[l] = (w as any)[l] || [];
-        (w as any)[l].push({
+        (w as Window & { [key: string]: unknown })[l] =
+          (w as Window & { [key: string]: unknown })[l] || [];
+        ((w as Window & { [key: string]: unknown })[l] as unknown[]).push({
           "gtm.start": new Date().getTime(),
           event: "gtm.js",
         });
-        var f = d.getElementsByTagName(s)[0],
+        const f = d.getElementsByTagName(s)[0],
           j = d.createElement(s),
           dl = l !== "dataLayer" ? "&l=" + l : "";
         j.setAttribute("async", "true");
@@ -225,7 +226,7 @@ import "@fontsource/instrument-sans/700.css";
 
       const currentPath = window.location.pathname;
       const isBlogDetailPage =
-        /^\/blog\/[^\/]+$/.test(currentPath) && currentPath !== "/blog/";
+        /^\/blog\/[^/]+$/.test(currentPath) && currentPath !== "/blog/";
       const shouldShowBackButton =
         pagesWithBackButton.some(
           (page) => currentPath.startsWith(page) || currentPath === page

@@ -6,8 +6,6 @@ import Input from "../components/input.astro";
 import "../styles/checkout.css";
 import "../styles/cartCard.css";
 import "../styles/button.css";
-
-const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
 ---
 
 <Layout>
@@ -488,7 +486,10 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
           });
 
           const result = await response.json();
+          // eslint-disable-next-line no-console
           console.log("Flip API:", result);
+          // eslint-disable-next-line no-console
+          console.error(err);
 
           if (!result.success) {
             alert(result.error || "Gagal memproses pembayaran.");
@@ -507,6 +508,7 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
 
           window.location.href = url;
         } catch (err) {
+          // eslint-disable-next-line no-console
           console.error(err);
           alert("Gagal memproses pembayaran. Silakan coba lagi.");
         }

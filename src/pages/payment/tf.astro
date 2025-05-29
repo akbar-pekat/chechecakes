@@ -155,6 +155,7 @@ import Button from "../../components/button.astro";
         });
 
         const result = await response.json();
+        // eslint-disable-next-line no-console
         console.log("Payment status response:", result);
 
         if (result.success && result.isSuccessful) {
@@ -163,6 +164,7 @@ import Button from "../../components/button.astro";
           this.showCard("finishCardFailed");
         }
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.error("Error checking payment:", err);
         this.showCard("finishCardFailed");
       }
