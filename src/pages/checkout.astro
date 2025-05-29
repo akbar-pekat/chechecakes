@@ -488,8 +488,6 @@ import "../styles/button.css";
           const result = await response.json();
           // eslint-disable-next-line no-console
           console.log("Flip API:", result);
-          // eslint-disable-next-line no-console
-          console.error(err);
 
           if (!result.success) {
             alert(result.error || "Gagal memproses pembayaran.");
@@ -506,10 +504,12 @@ import "../styles/button.css";
           localStorage.setItem("flipLinkId", result.link_id);
           localStorage.setItem("flipLinkUrl", url);
 
+          // eslint-disable-next-line no-console
+          console.log("Redirecting to:", url);
           window.location.href = url;
         } catch (err) {
           // eslint-disable-next-line no-console
-          console.error(err);
+          console.error("Payment error:", err);
           alert("Gagal memproses pembayaran. Silakan coba lagi.");
         }
       } else {
