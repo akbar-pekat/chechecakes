@@ -3,7 +3,7 @@ import { getAllPosts, getPost } from "../../lib/client";
 import Layout from "../../layouts/layout.astro";
 import Button from "../../components/button.astro";
 
-export const prerender = false;
+export const prerender = true;
 
 export async function getStaticPaths() {
   const data = await getAllPosts();
