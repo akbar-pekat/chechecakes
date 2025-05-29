@@ -96,7 +96,8 @@ nav img {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding: 12px 20px;
+  padding: 0 20px;
+  height: 92px;
   /* border-bottom: 1px solid #000000; */
   background-color: #ffffff;
 }
@@ -152,7 +153,7 @@ nav img {
 
 .sidebar .spacer {
   width: 100%;
-  height: 62%;
+  height: 59%;
   display: flex;
   flex: 1;
 }
