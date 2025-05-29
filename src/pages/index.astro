@@ -58,7 +58,7 @@ const categories = [
     static CART_KEY = "cart";
     static TS_KEY = "cartTimestamp";
     static CUST_KEY = "customerData";
-    static EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 jam
+    static EXPIRY_MS = 24 * 60 * 60 * 1000;
 
     static getCart() {
       const ts = localStorage.getItem(this.TS_KEY);
@@ -122,7 +122,7 @@ const categories = [
   }
 
   function updateButtonStates() {
-    CartManager.getCart(); // pastikan cart ter-load
+    CartManager.getCart();
     document.querySelectorAll(SEL.addBtn).forEach((btn) => {
       const id = btn.dataset.id;
       const item = CartManager.getCart().find((i) => i.id === id);
@@ -173,17 +173,13 @@ const categories = [
     });
   }
 
-  // -------------------------  SHEPHERD JS -------------------------
-  
 
   // ------------------------- INITIALIZATION -------------------------
   document.addEventListener("DOMContentLoaded", () => {
-    // Cart UI
     updateCartBadge();
     updateButtonStates();
     bindAddButtons();
 
-    // Category tabs
     document.querySelector(SEL.semuaTab)?.classList.add("active");
     filterItems("Semua");
     bindTabs();

@@ -10,7 +10,6 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
 const COURIER_PIN = import.meta.env.COURIER_PIN;
 
 let isAuthenticated = false;
-// let authError = "";
 
 if (Astro.request.method === "POST") {
   try {
@@ -134,12 +133,6 @@ if (Astro.request.method === "POST") {
     gap: 10px;
   }
 
-  .error {
-    color: red;
-    margin-bottom: 15px;
-    font-weight: 500;
-  }
-
   form {
     display: flex;
     flex-direction: column;
@@ -147,7 +140,7 @@ if (Astro.request.method === "POST") {
   }
 </style>
 
-<script type="module" define:vars={{ FLIP_API_KEY }}>
+<script type="module">
   class CheckoutController {
     static init() {
       this.el = {
@@ -157,16 +150,11 @@ if (Astro.request.method === "POST") {
         checkoutBtn: document.getElementById("checkoutButton"),
         noteTotal: document.getElementById("noteTotal"),
         nominalInput: document.getElementById("nominal"),
-        // addressInput: document.getElementById("alamatlengkap"),
         paymentLink: document.getElementById("paymentLink"),
         paymentLinkValue: document.getElementById("paymentLinkValue"),
         copyButton: document.getElementById("copyButton"),
         shareButton: document.getElementById("shareButton"),
       };
-
-      // Set default value untuk alamat
-      //   this.el.addressInput.value = "Diantar ke lokasi";
-      //   this.el.addressInput.disabled = true;
 
       this.el.checkoutBtn?.addEventListener("click", (e) => {
         e.preventDefault();
@@ -255,38 +243,22 @@ if (Astro.request.method === "POST") {
     static async handleCheckout() {
       if (!this.validate()) return;
 
-      const currentDomain = window.location.origin;
-      const FLIP_REDIRECT_URL = `${currentDomain}/payment/tf`;
       const cust = this.saveCustomer();
 
       try {
-        const form = new URLSearchParams({
-          title: `Pembayaran ${cust.orderId}`,
-          type: "SINGLE",
-          amount: cust.total,
-          // redirect_url: FLIP_REDIRECT_URL,
-          is_address_required: "0",
-          is_phone_number_required: "0",
-          step: "2",
-          sender_name: cust.name,
-          sender_email: "customer@chechecakes.biz.id",
-          sender_address: "Diantar ke lokasi",
+        const response = await fetch("/api/payment-ots", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: cust.name,
+            amount: cust.total,
+            orderId: cust.orderId,
+          }),
         });
 
-        const resp = await fetch(
-          "https://bigflip.id/big_sandbox_api/v2/pwf/bill",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              Accept: "application/json",
-              Authorization: `Basic ${FLIP_API_KEY}`,
-            },
-            body: form,
-          }
-        );
-
-        const result = await resp.json();
+        const result = await response.json();
         console.log("Flip API:", result);
 
         const raw =
@@ -304,9 +276,10 @@ if (Astro.request.method === "POST") {
           return;
         }
 
-        const url = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+        const url = /^https?:\/\//i.test(result.link_url)
+          ? result.link_url
+          : `https://${result.link_url}`;
 
-        // Tampilkan link pembayaran
         this.el.paymentLinkValue.textContent = url;
         this.el.paymentLink.style.display = "block";
         this.el.paymentLink.scrollIntoView({

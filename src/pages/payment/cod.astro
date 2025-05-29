@@ -25,17 +25,6 @@ import Button from "../../components/button.astro";
         Langsung kirim aja ya biar admin bisa proses cepat 🙌
       </div>
     </div>
-
-    <div class="finishCard" id="finishCardEmpty">
-      <img src="/cart.svg" class="illust" alt="IllustCart" />
-      <h2>Oops, pesanan kamu belum ada nih!</h2>
-      <div class="description">
-        Kayaknya kamu belum pesan, yuk balik ke menu buat pilih favoritmu dulu!
-      </div>
-      <div class="buttonGroup">
-        <Button href="/">Lihat menu</Button>
-      </div>
-    </div>
   </div>
 </Layout>
 
@@ -46,14 +35,19 @@ import Button from "../../components/button.astro";
     localStorage.getItem("flipLinkUrl");
 
   if (hasFlip) {
-    // redirect pakai replace agar tidak menambah history
     window.location.replace("/payment/tf");
+  }
+
+  const cartData = JSON.parse(localStorage.getItem("cart") || "[]");
+  const customerData = JSON.parse(localStorage.getItem("customerData") || "{}");
+
+  if (cartData.length === 0 || Object.keys(customerData).length === 0) {
+    window.location.replace("../emptyCart");
   }
 
   // -------------------- CONFIRMATION CONTROLLER --------------------
   class ConfirmationController {
     static init() {
-      // cache elemen
       this.el = {
         successCard: document.getElementById("finishCardSuccess"),
         emptyCard: document.getElementById("finishCardEmpty"),
@@ -62,16 +56,13 @@ import Button from "../../components/button.astro";
       };
       this.hasSentWhatsapp = false;
 
-      // parse data
       this.cartData = JSON.parse(localStorage.getItem("cart") || "[]");
       this.customerData = JSON.parse(
         localStorage.getItem("customerData") || "{}"
       );
 
-      // render UI sesuai data
       this.renderStatus();
 
-      // bind events
       this.el.whatsappButton?.addEventListener("click", () =>
         this.onWhatsApp()
       );
@@ -141,19 +132,16 @@ import Button from "../../components/button.astro";
         alert("Jangan lupa kirim pesanan ke WhatsApp admin dulu ya! 🙏");
         return;
       }
-      // clear storage dan kembali
       localStorage.removeItem("cart");
       localStorage.removeItem("customerData");
       window.location.href = "/";
     }
   }
 
-  // helper util
   function formatRupiah(amount) {
     return `Rp${Number(amount).toLocaleString("id-ID")}`;
   }
 
-  // inisialisasi
   document.addEventListener("DOMContentLoaded", () =>
     ConfirmationController.init()
   );

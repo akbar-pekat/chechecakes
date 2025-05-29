@@ -1,8 +1,6 @@
 ---
 import Layout from "../../layouts/layout.astro";
 import Button from "../../components/button.astro";
-
-const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
 ---
 
 <Layout>
@@ -48,39 +46,32 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
       </div>
       <Button>Balik ke Flip</Button>
     </div>
-
-    <div class="finishCard" id="finishCardEmpty">
-      <img src="/cart.svg" class="illust" alt="IllustCart" />
-      <h2>Oops, pesanan kamu belum ada nih!</h2>
-      <div class="description">
-        Kayaknya kamu belum pesan, yuk balik ke menu buat pilih favoritmu dulu!
-      </div>
-      <div class="buttonGroup">
-        <Button href="/">Lihat menu</Button>
-      </div>
-    </div>
   </div>
 </Layout>
 
-<script type="module" define:vars={{ FLIP_API_KEY }}>
+<script type="module">
   (function () {
     const hasFlipData =
       localStorage.getItem("flipResponse") ||
       localStorage.getItem("flipLinkId") ||
       localStorage.getItem("flipLinkUrl");
     if (!hasFlipData) {
-      // replace supaya tidak menambah entry ke history
       window.location.replace("/payment/cod");
     }
   })();
 
+  const cartData = JSON.parse(localStorage.getItem("cart") || "[]");
+  const customerData = JSON.parse(localStorage.getItem("customerData") || "{}");
+  
+  if (cartData.length === 0 || Object.keys(customerData).length === 0) {
+    window.location.replace("../emptyCart");
+  }
+
   // ------------------------- TRANSFER CONFIRMATION -------------------------
   class TransferConfirmationController {
     static init() {
-      // Cache elemen
       this.el = {
         successCard: document.getElementById("finishCardSuccess"),
-        emptyCard: document.getElementById("finishCardEmpty"),
         checkingCard: document.getElementById("finishCardCheck"),
         failedCard: document.getElementById("finishCardFailed"),
         whatsappBtn: document.getElementById("whatsappButton"),
@@ -94,17 +85,14 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
       };
       this.hasSentWhatsapp = false;
 
-      // Load data sekali
       this.cartData = JSON.parse(localStorage.getItem("cart") || "[]");
       this.customerData = JSON.parse(
         localStorage.getItem("customerData") || "{}"
       );
       this.flipData = JSON.parse(localStorage.getItem("flipResponse") || "{}");
 
-      // Render initial card
       this.showCard(this._determineInitialCard());
 
-      // Bind events
       this.el.whatsappBtn?.addEventListener("click", () =>
         this.sendToWhatsApp()
       );
@@ -115,31 +103,33 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
       this.el.backToFlipBtn?.addEventListener("click", () =>
         this.onBackToFlip()
       );
-      window.addEventListener("pageshow", () =>
-        this.showCard(this._determineInitialCard())
-      );
+      window.addEventListener("pageshow", () => {
+        const cartData = JSON.parse(localStorage.getItem("cart") || "[]");
+        const customerData = JSON.parse(localStorage.getItem("customerData") || "{}");
+        
+        if (cartData.length === 0 || Object.keys(customerData).length === 0) {
+          window.location.replace("/payment/empty-cart");
+        } else {
+          this.showCard(this._determineInitialCard());
+        }
+      });
 
-      // If we should check status, do it
       if (this._shouldCheck()) {
         this.checkPaymentStatus();
       }
     }
 
-    // Tentukan card mana yang tampil ketika pertama load/back
     static _determineInitialCard() {
       if (!this.cartData.length || !this.customerData.orderId) {
         return "finishCardEmpty";
       }
-      // Jika belum pernah cek, tampilkan checking
       return this.el.checkingCard ? "finishCardCheck" : "finishCardCheck";
     }
 
-    // Cek apakah perlu panggil API flip
     static _shouldCheck() {
       return this._determineInitialCard() === "finishCardCheck";
     }
 
-    // Tampilkan salah satu card
     static showCard(cardId) {
       document.querySelectorAll(".finishCard").forEach((c) => {
         c.style.display = "none";
@@ -148,28 +138,26 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
       if (sel) sel.style.display = "flex";
     }
 
-    // Panggil API untuk cek status pembayaran
     static async checkPaymentStatus() {
       if (!this.flipData.link_id) {
         return this.showCard("finishCardFailed");
       }
 
       try {
-        const headers = new Headers({
-          Accept: "application/json",
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Basic ${FLIP_API_KEY}`,
+        const response = await fetch("/api/payment-check", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            link_id: this.flipData.link_id
+          }),
         });
 
-        const resp = await fetch(
-          `https://bigflip.id/big_sandbox_api/v2/pwf/${this.flipData.link_id}/payment`,
-          { method: "GET", headers }
-        );
-        const result = await resp.json();
-        console.log("Payment status:", result);
+        const result = await response.json();
+        console.log("Payment status response:", result);
 
-        const payments = result.data || [];
-        if (payments.length && payments[0].status === "SUCCESSFUL") {
+        if (result.success && result.isSuccessful) {
           this.showCard("finishCardSuccess");
         } else {
           this.showCard("finishCardFailed");
@@ -180,7 +168,6 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
       }
     }
 
-    // Format dan kirim ke WhatsApp
     static sendToWhatsApp() {
       if (!this.cartData.length || !this.customerData.orderId) {
         alert("Tidak ada data pesanan untuk dikirim.");
@@ -222,7 +209,6 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
       this.hasSentWhatsapp = true;
     }
 
-    // Tombol kembali
     static onBack(e) {
       e.preventDefault();
       if (!this.hasSentWhatsapp) {
@@ -237,7 +223,6 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
       window.location.href = "/";
     }
 
-    // Tombol “Kembali ke Flip”
     static onBackToFlip() {
       if (this.flipData.link_url) {
         window.location.href = /^https?:\/\//i.test(this.flipData.link_url)
@@ -252,7 +237,6 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
     return `Rp${Number(amount).toLocaleString("id-ID")}`;
   }
 
-  // Inisialisasi
   document.addEventListener("DOMContentLoaded", () => {
     TransferConfirmationController.init();
   });

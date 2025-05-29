@@ -1,15 +1,18 @@
 ---
 import Layout from "../layouts/layout.astro";
+import Button from "../components/button.astro";
 ---
 
 <Layout>
   <div class="container">
-    <div class="finishCard" id="finishCardSuccess">
-      <img src="/500.svg" class="illust" alt="IllustCart" />
-      <h2>Oops, ada yang error di sistem kami 😓</h2>
+    <div class="finishCard" id="finishCardEmpty">
+      <img src="/cart.svg" class="illust" alt="IllustCart" />
+      <h2>Oops, pesanan kamu belum ada nih!</h2>
       <div class="description">
-        Server-nya lagi ngambek kayak adonan overmix 😩, coba tunggu bentar dan
-        coba lagi nanti ya.
+        Kayaknya kamu belum pesan, yuk balik ke menu buat pilih favoritmu dulu!
+      </div>
+      <div class="buttonGroup">
+        <Button href="/">Lihat menu</Button>
       </div>
     </div>
   </div>
@@ -51,6 +54,12 @@ import Layout from "../layouts/layout.astro";
     justify-content: flex-start;
     align-self: stretch;
     position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .finishCard:hover {
+    border: 1px solid #000000;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 1);
   }
 
   .finishCard h2 {
@@ -73,15 +82,5 @@ import Layout from "../layouts/layout.astro";
     display: flex;
     flex-direction: row;
     gap: 8px;
-  }
-
-  .smallNote {
-    color: #808080;
-    text-align: center;
-    font-size: 12px;
-    line-height: 16px;
-    font-weight: 400;
-    position: relative;
-    align-self: stretch;
   }
 </style>
