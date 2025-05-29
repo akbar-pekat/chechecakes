@@ -148,7 +148,7 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
   </div>
 </Layout>
 
-<script type="module" define:vars={{ FLIP_API_KEY }}>
+<script type="module">
   // ------------------------- UTIL -------------------------
   const MAX_QTY = 20;
   const promoCodes = {
@@ -212,7 +212,6 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
   // ------------------------- CHECKOUT CONTROLLER -------------------------
   class CheckoutController {
     static init() {
-      // cache elemen
       this.el = {
         cartContainer: document.getElementById("cartItems"),
         emptyState: document.getElementById("emptyCart"),
@@ -234,7 +233,6 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
         ),
       };
 
-      // bind events
       window.addEventListener("cartUpdated", () => {
         this.render();
         this.updateTotals();
@@ -253,7 +251,7 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
       );
       this.el.paymentRadios.forEach((r) =>
         r.addEventListener("change", () => {
-          this.updatePaymentNote(); // Add this line
+          this.updatePaymentNote();
         })
       );
       this.el.checkoutBtn?.addEventListener("click", (e) => {
@@ -265,7 +263,6 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
     static render() {
       const cart = CartManager.get();
       const isEmpty = cart.length === 0;
-      // toggle UI
       this.el.emptyState.style.display = isEmpty ? "flex" : "none";
       this.el.cartContainer.style.display = isEmpty ? "none" : "flex";
       this.el.formCustomer?.style.setProperty(
@@ -275,7 +272,6 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
       this.el.summary?.style.setProperty("display", isEmpty ? "none" : "flex");
       if (isEmpty) return;
 
-      // clear and render each
       this.el.cartContainer.innerHTML = "";
       cart.forEach((p) => {
         const card = document.createElement("div");
@@ -293,7 +289,6 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
           </div>
         `;
         const action = card.querySelector(".action");
-        // buttons
         action.insertBefore(
           this.makeBtn("Kurangi", () => CartManager.dec(p.id)),
           action.firstChild
@@ -346,10 +341,8 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
 
       if (method === "delivery") {
         fee = subtotal >= 60000 ? 5000 : 10000;
-        // promo only on delivery fee
         const code = this.el.promoInput.value.toUpperCase();
         if (code in promoCodes) fee = Math.max(0, fee - promoCodes[code]);
-        // show note only when subtotal>=60000
         this.el.noteFee.style.display = subtotal >= 60000 ? "block" : "none";
       } else {
         fee = 0;
@@ -373,7 +366,6 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
       if (method === "takeaway") {
         this.el.addressInput.value = "Ambil di toko";
         this.el.addressInput.disabled = true;
-        // hide any existing error
         const err =
           this.el.addressInput.parentElement.querySelector(".errorText");
         if (err) err.style.display = "none";
@@ -387,7 +379,6 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
       let ok = true;
       let firstField = null;
 
-      // 1. Validasi Nama (min. 3 karakter)
       const nameInp = document.getElementById("namalengkap");
       const nameErr = nameInp.parentElement.querySelector(".errorText");
       if (nameInp.value.trim().length < 3) {
@@ -399,18 +390,9 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
         nameErr.style.display = "none";
       }
 
-      // 2. Validasi WA (min. 10 digit angka)
       const phoneInp = document.getElementById("nomorwa");
       const phoneErr = phoneInp.parentElement.querySelector(".errorText");
       const digits = phoneInp.value.replace(/\D/g, "");
-      // if (digits.length < 10 || digits.length > 13) {
-      //   phoneErr.textContent = "Nomor WA harus 10-13 digit";
-      //   phoneErr.style.display = "block";
-      //   ok = false;
-      //   firstField = firstField || phoneInp;
-      // } else {
-      //   phoneErr.style.display = "none";
-      // }
 
       if (
         digits.length < 10 ||
@@ -425,7 +407,6 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
         phoneErr.style.display = "none";
       }
 
-      // 3. Validasi Alamat hanya saat delivery
       const delivery = document.querySelector(
         'input[name="delivery"]:checked'
       )?.value;
@@ -442,13 +423,11 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
         }
       }
 
-      // 4. Keranjang tidak boleh kosong
       if (CartManager.get().length === 0) {
         alert("Keranjang masih kosong!");
         ok = false;
       }
 
-      // Scroll & focus ke field pertama yang gagal
       if (!ok && firstField) {
         firstField.scrollIntoView({ behavior: "smooth", block: "center" });
         firstField.focus();
@@ -490,65 +469,40 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
     static async handleCheckout() {
       if (!this.validate()) return;
 
-      const currentDomain = window.location.origin;
-      const FLIP_REDIRECT_URL = `${currentDomain}/payment/tf`;
-      console.log(FLIP_REDIRECT_URL);
       const cust = this.saveCustomer();
 
       if (cust.paymentMethod === "transfer") {
         try {
-          const form = new URLSearchParams({
-            title: `Pembayaran ${cust.orderId}`,
-            type: "SINGLE",
-            amount: cust.total,
-            redirect_url: FLIP_REDIRECT_URL,
-            is_address_required: "1",
-            is_phone_number_required: "1",
-            step: "2",
-            sender_name: cust.name,
-            sender_email: "customer@chechecakes.biz.id",
-            sender_phone_number: cust.phone,
-            sender_address: cust.address,
+          const response = await fetch("/api/payment-co", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              name: cust.name,
+              phone: cust.phone,
+              address: cust.address,
+              total: cust.total,
+              orderId: cust.orderId,
+            }),
           });
 
-          const resp = await fetch(
-            "https://bigflip.id/big_sandbox_api/v2/pwf/bill",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-                Accept: "application/json",
-                Authorization: `Basic ${FLIP_API_KEY}`,
-              },
-              body: form,
-            }
-          );
-
-          const result = await resp.json();
+          const result = await response.json();
           console.log("Flip API:", result);
 
-          // cari URL di berbagai kemungkinan
-          const raw =
-            result.link_url ??
-            result.data?.link_url ??
-            result.data?.payment?.link_url;
-          const linkId =
-            result.link_id ??
-            result.data?.link_id ??
-            result.data?.payment?.link_id;
-
-          if (!raw || !linkId) {
-            console.error("Flip response missing link_url or link_id:", result);
-            alert("Gagal mendapatkan data pembayaran.");
+          if (!result.success) {
+            alert(result.error || "Gagal memproses pembayaran.");
             return;
           }
 
-          const url = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+          const url = /^https?:\/\//i.test(result.link_url)
+            ? result.link_url
+            : `https://${result.link_url}`;
 
-          const flipData = { link_id: linkId, link_url: url };
+          const flipData = { link_id: result.link_id, link_url: url };
           localStorage.setItem("flipResponse", JSON.stringify(flipData));
-          // tambahan jika perlu
-          localStorage.setItem("flipLinkId", linkId);
+
+          localStorage.setItem("flipLinkId", result.link_id);
           localStorage.setItem("flipLinkUrl", url);
 
           window.location.href = url;
@@ -562,6 +516,5 @@ const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
     }
   }
 
-  // ------------------------- BOOTSTRAP -------------------------
   CheckoutController.init();
 </script>
