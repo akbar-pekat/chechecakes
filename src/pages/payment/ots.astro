@@ -6,7 +6,6 @@ import Input from "../../components/input.astro";
 import "../../styles/checkout.css";
 import "../../styles/button.css";
 
-const FLIP_API_KEY = import.meta.env.PUBLIC_FLIP_API_KEY;
 const COURIER_PIN = import.meta.env.COURIER_PIN;
 
 let isAuthenticated = false;
@@ -19,7 +18,9 @@ if (Astro.request.method === "POST") {
     if (submittedPin === COURIER_PIN) {
       isAuthenticated = true;
     }
-  } catch (error) {}
+  } catch {
+    // Intentionally empty - ignore form parsing errors
+  }
 }
 ---
 
@@ -183,6 +184,7 @@ if (Astro.request.method === "POST") {
             url: text,
           });
         } catch (err) {
+          // eslint-disable-next-line no-console
           console.error("Error sharing:", err);
           alert("Gagal membagikan link. Silakan salin manual.");
         }
@@ -259,6 +261,7 @@ if (Astro.request.method === "POST") {
         });
 
         const result = await response.json();
+        // eslint-disable-next-line no-console
         console.log("Flip API:", result);
 
         const raw =
@@ -271,6 +274,7 @@ if (Astro.request.method === "POST") {
           result.data?.payment?.link_id;
 
         if (!raw || !linkId) {
+          // eslint-disable-next-line no-console
           console.error("Flip response missing link_url or link_id:", result);
           alert("Gagal mendapatkan data pembayaran.");
           return;
@@ -287,6 +291,7 @@ if (Astro.request.method === "POST") {
           block: "center",
         });
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.error(err);
         alert("Gagal memproses pembayaran. Silakan coba lagi.");
       }

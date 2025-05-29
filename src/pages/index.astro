@@ -69,6 +69,7 @@ const categories = [
       try {
         return JSON.parse(localStorage.getItem(this.CART_KEY) || "[]");
       } catch {
+        // eslint-disable-next-line no-console
         console.warn("Invalid cart data, resetting.");
         this.clear();
         return [];
