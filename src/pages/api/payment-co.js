@@ -24,7 +24,7 @@ export async function POST({ request }) {
     const REDIRECT_URL = "https://chechecakes.biz.id/payment/tf";
 
     const form = new URLSearchParams({
-      title: `Pembayaran ${orderId}`,
+      title: `Pesanan ${orderId}`,
       type: "SINGLE",
       amount: total,
       redirect_url: REDIRECT_URL,
