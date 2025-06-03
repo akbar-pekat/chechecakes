@@ -3,7 +3,7 @@ export async function POST({ request }) {
     const data = await request.json();
     const { name, phone, address, total, orderId } = data;
 
-    const FLIP_API_KEY = import.meta.env.FLIP_API_KEY;
+    const FLIP_API_KEY = import.meta.env.FLIP_API_KEY2;
 
     if (!FLIP_API_KEY) {
       console.error("API key tidak ditemukan");
@@ -24,7 +24,7 @@ export async function POST({ request }) {
     const REDIRECT_URL = "https://chechecakes.biz.id/payment/tf";
 
     const form = new URLSearchParams({
-      title: `Pembayaran ${orderId}`,
+      title: `Pesanan ${orderId}`,
       type: "SINGLE",
       amount: total,
       redirect_url: REDIRECT_URL,
@@ -38,7 +38,7 @@ export async function POST({ request }) {
     });
 
     const response = await fetch(
-      "https://bigflip.id/big_sandbox_api/v2/pwf/bill",
+      "https://bigflip.id/api/v3/pwf/bill",
       {
         method: "POST",
         headers: {
