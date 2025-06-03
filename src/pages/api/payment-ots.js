@@ -4,6 +4,7 @@ export async function POST({ request }) {
     const { name, amount, orderId } = data;
 
     const FLIP_API_KEY = import.meta.env.FLIP_API_KEY;
+    const FIXIE_URL = import.meta.env.FIXIE_URL;
 
     const form = new URLSearchParams({
       title: `Pembayaran ${orderId}`,
@@ -17,18 +18,38 @@ export async function POST({ request }) {
       sender_address: "Diantar ke lokasi",
     });
 
+    const fetchOptions = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "application/json",
+        Authorization: `Basic ${FLIP_API_KEY}`,
+      },
+      body: form,
+    };
+
+    if (FIXIE_URL) {
+      const { HttpsProxyAgent } = await import("https-proxy-agent");
+      fetchOptions.agent = new HttpsProxyAgent(FIXIE_URL);
+    }
+
     const response = await fetch(
       "https://bigflip.id/big_sandbox_api/v2/pwf/bill",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Accept: "application/json",
-          Authorization: `Basic ${FLIP_API_KEY}`,
-        },
-        body: form,
-      }
+      fetchOptions
     );
+
+    // const response = await fetch(
+    //   "https://bigflip.id/big_sandbox_api/v2/pwf/bill",
+    //   {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/x-www-form-urlencoded",
+    //       Accept: "application/json",
+    //       Authorization: `Basic ${FLIP_API_KEY}`,
+    //     },
+    //     body: form,
+    //   }
+    // );
 
     const result = await response.json();
 
@@ -46,7 +67,7 @@ export async function POST({ request }) {
       }
     );
   } catch (error) {
-    console.error('Payment error:', error);
+    console.error("Payment error:", error);
     return new Response(
       JSON.stringify({
         success: false,
