@@ -9,7 +9,8 @@ export async function POST({ request }) {
       );
     }
 
-    const FLIP_API_KEY = import.meta.env.FLIP_API_KEY;
+    const FLIP_API_KEY = import.meta.env.FLIP_API_KEY2;
+    const FIXIE_URL = import.meta.env.FIXIE_URL;
 
     if (!FLIP_API_KEY) {
       return new Response(
@@ -24,10 +25,25 @@ export async function POST({ request }) {
       Authorization: `Basic ${FLIP_API_KEY}`,
     });
 
+    const fetchOptions = {
+      method: "GET",
+      headers,
+    };
+
+    if (FIXIE_URL) {
+      const { HttpsProxyAgent } = await import("https-proxy-agent");
+      fetchOptions.agent = new HttpsProxyAgent(FIXIE_URL);
+    }
+
     const response = await fetch(
       `https://bigflip.id/big_sandbox_api/v2/pwf/${link_id}/payment`,
-      { method: "GET", headers }
+      fetchOptions
     );
+
+    // const response = await fetch(
+    //   `https://bigflip.id/big_sandbox_api/v2/pwf/${link_id}/payment`,
+    //   { method: "GET", headers }
+    // );
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

@@ -22,6 +22,7 @@ export async function POST({ request }) {
     }
 
     const REDIRECT_URL = "https://chechecakes.biz.id/payment/tf";
+    const FIXIE_URL = import.meta.env.FIXIE_URL;
 
     const form = new URLSearchParams({
       title: `Pesanan ${orderId}`,
@@ -37,18 +38,38 @@ export async function POST({ request }) {
       sender_address: address,
     });
 
+    const fetchOptions = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "application/json",
+        Authorization: `Basic ${FLIP_API_KEY}`,
+      },
+      body: form,
+    };
+
+    if (FIXIE_URL) {
+      const { HttpsProxyAgent } = await import("https-proxy-agent");
+      fetchOptions.agent = new HttpsProxyAgent(FIXIE_URL);
+    }
+
     const response = await fetch(
       "https://bigflip.id/api/v3/pwf/bill",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Accept: "application/json",
-          Authorization: `Basic ${FLIP_API_KEY}`,
-        },
-        body: form,
-      }
+      fetchOptions
     );
+
+    // const response = await fetch(
+    //   "https://bigflip.id/api/v3/pwf/bill",
+    //   {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/x-www-form-urlencoded",
+    //       Accept: "application/json",
+    //       Authorization: `Basic ${FLIP_API_KEY}`,
+    //     },
+    //     body: form,
+    //   }
+    // );
 
     const result = await response.json();
     console.log("Full Flip API Response:", JSON.stringify(result));

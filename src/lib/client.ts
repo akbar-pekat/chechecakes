@@ -1,14 +1,31 @@
 import { gql, GraphQLClient } from "graphql-request";
 import type { AllPostsData, PostData } from "./schema";
 
-export const getClient = () => {
-  return new GraphQLClient("https://gql.hashnode.com");
+export const getClient = async () => {
+  const client = new GraphQLClient("https://gql.hashnode.com");
+
+  if (import.meta.env.FIXIE_URL) {
+    const { HttpsProxyAgent } = await import("https-proxy-agent");
+    const agent = new HttpsProxyAgent(import.meta.env.FIXIE_URL);
+
+    const client = new GraphQLClient("https://gql.hashnode.com", {
+      fetch: async (input: RequestInfo | URL, options = {}) => {
+        (options as any).agent = agent;
+        return fetch(input, options);
+      },
+    });
+
+    return client;
+  }
+
+  return client;
 };
 
 const myHashnodeURL = "chechecakes.hashnode.dev";
 
+// Ubah getAllPosts dan getPost untuk menggunakan await getClient()
 export const getAllPosts = async () => {
-  const client = getClient();
+  const client = await getClient();
 
   const allPosts = await client.request<AllPostsData>(
     gql`
@@ -53,7 +70,7 @@ export const getAllPosts = async () => {
 };
 
 export const getPost = async (slug: string) => {
-  const client = getClient();
+  const client = await getClient();
 
   const data = await client.request<PostData>(
     gql`

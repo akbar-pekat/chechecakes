@@ -16,7 +16,8 @@
     "@astrojs/vercel": "^8.1.4",
     "@fontsource/instrument-sans": "^5.2.5",
     "astro": "^5.7.12",
-    "graphql-request": "^7.1.2"
+    "graphql-request": "^7.1.2",
+    "https-proxy-agent": "^7.0.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.27.0",
