@@ -285,7 +285,7 @@ import Button from "../../components/button.astro";
             if (checkCard) checkCard.style.display = "none";
             if (successCard) successCard.style.display = "flex";
 
-            clearInterval(intervalId);
+            // clearInterval(intervalId);
 
             const whatsappButton = document.getElementById("whatsappButton");
             if (whatsappButton) {
@@ -362,11 +362,11 @@ import Button from "../../components/button.astro";
     };
 
     checkPaymentStatus();
-    const intervalId = setInterval(checkPaymentStatus, 20000);
+    // const intervalId = setInterval(checkPaymentStatus, 20000);
 
-    window.addEventListener("beforeunload", () => {
-      clearInterval(intervalId);
-    });
+    // window.addEventListener("beforeunload", () => {
+    //   clearInterval(intervalId);
+    // });
   });
 </script>
 
