@@ -44,12 +44,12 @@ import Button from "../../components/button.astro";
         Kita belum dapet konfirmasi dari pembayaran kamu. Udah bayar? Coba
         tunggu sebentar terus refresh aja.
       </div>
-      <Button>Balik ke Flip</Button>
+      <Button>Balik ke halaman Pembayaran</Button>
     </div>
   </div>
 </Layout>
 
-<script type="module">
+<!-- <script type="module">
   (function () {
     const hasFlipData =
       localStorage.getItem("flipResponse") ||
@@ -241,6 +241,132 @@ import Button from "../../components/button.astro";
 
   document.addEventListener("DOMContentLoaded", () => {
     TransferConfirmationController.init();
+  });
+</script> -->
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const checkCard = document.getElementById("finishCardCheck");
+    const successCard = document.getElementById("finishCardSuccess");
+    const failedCard = document.getElementById("finishCardFailed");
+
+    if (checkCard) checkCard.style.display = "flex";
+    if (successCard) successCard.style.display = "none";
+    if (failedCard) failedCard.style.display = "none";
+
+    let reference;
+    const paymentDataString = localStorage.getItem("paymentData");
+    if (paymentDataString) {
+      try {
+        const paymentData = JSON.parse(paymentDataString);
+        reference = paymentData.data.reference;
+      } catch (error) {
+        console.error("Error parsing payment data:", error);
+      }
+    }
+
+    if (!reference) {
+      if (checkCard) checkCard.style.display = "none";
+      if (failedCard) failedCard.style.display = "flex";
+      return;
+    }
+
+    const checkPaymentStatus = async () => {
+      try {
+        const response = await fetch(
+          `/api/payment-check?reference=${reference}`
+        );
+        const result = await response.json();
+
+        if (result.success) {
+          const message = result.message || "";
+
+          if (message.includes("DIBAYAR") && !message.includes("UNPAID")) {
+            if (checkCard) checkCard.style.display = "none";
+            if (successCard) successCard.style.display = "flex";
+
+            clearInterval(intervalId);
+
+            const whatsappButton = document.getElementById("whatsappButton");
+            if (whatsappButton) {
+              whatsappButton.addEventListener("click", () => {
+                // Ambil data customer dari localStorage
+                const customerData = JSON.parse(
+                  localStorage.getItem("customerData") || "{}"
+                );
+
+                const message = `Halo Admin Cheche Cakes! Saya sudah melakukan pembayaran untuk pesanan dengan ID: ${customerData.orderId || reference}. Mohon segera diproses ya. Terima kasih!`;
+
+                window.open(
+                  `https://wa.me/6281234567890?text=${encodeURIComponent(message)}`,
+                  "_blank"
+                );
+
+                localStorage.setItem("whatsappSent", "true");
+              });
+            }
+
+            const backHomeButton = document.querySelector(
+              "#finishCardSuccess .buttonGroup button:first-child"
+            );
+            if (backHomeButton) {
+              backHomeButton.addEventListener("click", () => {
+                const whatsappSent =
+                  localStorage.getItem("whatsappSent") === "true";
+                if (whatsappSent) {
+                  localStorage.removeItem("cart");
+                  localStorage.removeItem("customerData");
+                  localStorage.removeItem("paymentData");
+                  localStorage.removeItem("whatsappSent");
+
+                  window.location.href = "/";
+                } else {
+                  alert(
+                    "Jangan lupa kirim pesanan ke WhatsApp admin dulu ya! 🙏"
+                  );
+                }
+              });
+            }
+          } else {
+            if (checkCard) checkCard.style.display = "none";
+            if (failedCard) failedCard.style.display = "flex";
+
+            // Setup tombol refresh
+            const refreshButton = document.querySelector(
+              "#finishCardFailed Button:first-child"
+            );
+            if (refreshButton) {
+              refreshButton.addEventListener("click", () => {
+                location.reload();
+              });
+            }
+
+            const backToPaymentButton = document.querySelector(
+              "#finishCardFailed Button:last-child"
+            );
+            if (backToPaymentButton) {
+              backToPaymentButton.addEventListener("click", () => {
+                window.location.href = "/payment/va";
+              });
+            }
+          }
+        } else {
+          if (checkCard) checkCard.style.display = "none";
+          if (failedCard) failedCard.style.display = "flex";
+        }
+      } catch (error) {
+        console.error("Error checking payment status:", error);
+        if (checkCard) checkCard.style.display = "none";
+        if (failedCard) failedCard.style.display = "flex";
+      }
+    };
+
+    checkPaymentStatus();
+    const intervalId = setInterval(checkPaymentStatus, 20000);
+
+    window.addEventListener("beforeunload", () => {
+      clearInterval(intervalId);
+    });
   });
 </script>
 

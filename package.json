@@ -12,10 +12,11 @@
     "lint:check": "eslint . --ext .js,.ts,.astro --max-warnings 0"
   },
   "dependencies": {
-    "@astrojs/sitemap": "^3.4.0",
-    "@astrojs/vercel": "^8.1.4",
+    "@astrojs/sitemap": "^3.5.0",
+    "@astrojs/vercel": "^8.0.5",
     "@fontsource/instrument-sans": "^5.2.5",
-    "astro": "^5.7.12",
+    "astro": "^5.13.2",
+    "axios": "^1.11.0",
     "graphql-request": "^7.1.2",
     "https-proxy-agent": "^7.0.6"
   },
