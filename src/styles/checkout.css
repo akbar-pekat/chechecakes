@@ -129,8 +129,9 @@
 }
 
 .customOptions .options {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* grid-template-rows: 1fr 1fr; */
   gap: 12px;
   flex: 1;
 }
@@ -323,3 +324,19 @@
   font-size: 14px;
   line-height: 16px;
 }
+
+.paymentGroup {
+  margin-bottom: 16px;
+}
+
+.paymentGroupHeader {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-black);
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+
+/* .customOptions .options .option:nth-child(5) {
+  grid-column: 1 / -1;
+} */

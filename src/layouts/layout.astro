@@ -48,7 +48,7 @@ import "@fontsource/instrument-sans/700.css";
     <meta name="theme-color" content="#351500" />
     <meta name="generator" content={Astro.generator} />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <link rel="manifest" href="/manifest.webmanifest" />
+    <!-- <link rel="manifest" href="/manifest.webmanifest" /> -->
     <meta
       name="description"
       content="Pesan aneka kue rumahan langsung via WhatsApp dari Cheche Cakes - toko kue di Sumbawa Besar, NTB. Praktis, manis, dan personal!"
@@ -132,7 +132,7 @@ import "@fontsource/instrument-sans/700.css";
           <li><a href="/">Beranda</a></li>
           <li><a href="/blog">Blog</a></li>
         </ul>
-        <div class="buttonContainer">
+        <!-- <div class="buttonContainer">
           <button
             id="install-button"
             class="button"
@@ -140,11 +140,11 @@ import "@fontsource/instrument-sans/700.css";
           >
             📲 Install Cheche Cakes~
           </button>
-        </div>
+        </div> -->
       </div>
       <div class="spacer"></div>
       <footer>
-        <a href="/payment/ots" class="footerLink">Payment OTS</a>
+        <!-- <a href="/payment/ots" class="footerLink">Payment OTS</a> -->
         <a href="/tnc" class="footerLink">Syarat & Ketentuan</a>
         <a href="/privacy" class="footerLink">Kebijakan Privasi</a>
         <a href="/refund" class="footerLink">Kebijakan Refund</a>
@@ -249,7 +249,7 @@ import "@fontsource/instrument-sans/700.css";
         }
       });
     </script>
-    <script>
+    <!-- <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
           navigator.serviceWorker
@@ -262,7 +262,7 @@ import "@fontsource/instrument-sans/700.css";
             });
         });
       }
-    </script>
+    </script> -->
     <script>
       const menuToggle = document.getElementById("menu-toggle");
       const sidebar = document.getElementById("sidebar");
@@ -299,7 +299,7 @@ import "@fontsource/instrument-sans/700.css";
         "/tnc",
         "/refund",
         "/faq",
-        "/payment/ots",
+        // "/payment/ots",
       ];
 
       const currentPath = window.location.pathname;

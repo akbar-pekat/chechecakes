@@ -55,31 +55,80 @@ import "../styles/button.css";
               Pilih cara yang paling nyaman buat kamu ya.
             </div>
           </div>
-          <div class="options">
-            <label class="option">
-              <input type="radio" name="payment" value="transfer" checked />
-              <div class="optionContent">
-                <div class="optionTitle">Transfer via Flip</div>
-                <div class="optionDesc">
-                  Bayar lewat Flip, gampang, aman dan cepat!
-                </div>
-              </div>
-            </label>
 
-            <label class="option">
-              <input type="radio" name="payment" value="cash" />
-              <div class="optionContent">
-                <div class="optionTitle">Bayar tunai</div>
-                <div class="optionDesc">
-                  Bayar tunai langsung saat kue sampai, di toko atau alamat
-                  kamu.
+          <!-- Payment Methods Section -->
+          <div class="paymentGroup">
+            <div class="paymentGroupHeader">Pembayaran Online (VA)</div>
+            <div class="options">
+              <label class="option">
+                <input type="radio" name="payment" value="MANDIRIVA" />
+                <div class="optionContent">
+                  <div class="optionTitle">Transfer VA Mandiri</div>
+                  <div class="optionDesc">
+                    Transfer pake VA Mandiri. Khusus untuk rekening Mandiri aja
+                    ya.
+                  </div>
                 </div>
-              </div>
-            </label>
+              </label>
+
+              <label class="option">
+                <input type="radio" name="payment" value="BNIVA" />
+                <div class="optionContent">
+                  <div class="optionTitle">Transfer VA BNI</div>
+                  <div class="optionDesc">
+                    Transfer pake VA BNI. Khusus untuk rekening BNI aja ya.
+                  </div>
+                </div>
+              </label>
+
+              <label class="option">
+                <input type="radio" name="payment" value="BCAVA" />
+                <div class="optionContent">
+                  <div class="optionTitle">Transfer VA BCA</div>
+                  <div class="optionDesc">
+                    Transfer pake VA BCA. Khusus untuk rekening BCA aja ya.
+                  </div>
+                </div>
+              </label>
+
+              <label class="option">
+                <input type="radio" name="payment" value="BRIVA" />
+                <div class="optionContent">
+                  <div class="optionTitle">Transfer VA BRI</div>
+                  <div class="optionDesc">
+                    Transfer pake VA BRI. Khusus untuk rekening BRI aja ya.
+                  </div>
+                </div>
+              </label>
+
+              <label class="option">
+                <input type="radio" name="payment" value="BSIVA" />
+                <div class="optionContent">
+                  <div class="optionTitle">Transfer VA BSI</div>
+                  <div class="optionDesc">
+                    Transfer pake VA BSI. Khusus untuk rekening BSI aja ya.
+                  </div>
+                </div>
+              </label>
+              <!-- Add more payment options here -->
+            </div>
           </div>
-          <div class="noteFlip">
-            Saat ini <strong>Transfer via Flip</strong> masih dalam mode uji coba,
-            jadi belum memproses pembayaran sungguhan ya~
+
+          <div class="paymentGroup">
+            <div class="paymentGroupHeader">Pembayaran Tunai</div>
+            <div class="options">
+              <label class="option">
+                <input type="radio" name="payment" value="cash" checked />
+                <div class="optionContent">
+                  <div class="optionTitle">Bayar tunai</div>
+                  <div class="optionDesc">
+                    Bayar tunai langsung saat kue sampai, di toko atau alamat
+                    kamu.
+                  </div>
+                </div>
+              </label>
+              <!-- Add more payment options here -->
+            </div>
           </div>
         </div>
 
@@ -137,9 +186,6 @@ import "../styles/button.css";
       <div class="totalContainer">
         <div class="label">Total</div>
         <div class="valueBig" id="totalValue">Rp70.000</div>
-      </div>
-      <div class="noteFlip" id="noteTotal">
-        Totalnya masih belum termasuk biaya admin dari metode bayarnya ya
       </div>
       <Button style="block" id="checkoutButton">Lanjutkan</Button>
     </div>
@@ -225,7 +271,6 @@ import "../styles/button.css";
         addressInput: document.getElementById("alamatlengkap"),
         checkoutBtn: document.getElementById("checkoutButton"),
         noteFee: document.querySelector(".noteFee"),
-        noteTotal: document.getElementById("noteTotal"),
         paymentRadios: Array.from(
           document.querySelectorAll('input[name="payment"]')
         ),
@@ -320,9 +365,7 @@ import "../styles/button.css";
       )?.value;
 
       if (paymentMethod === "transfer") {
-        this.el.noteTotal.style.display = "block";
       } else {
-        this.el.noteTotal.style.display = "none";
       }
     }
 
@@ -448,6 +491,8 @@ import "../styles/button.css";
       const ts = new Date().toISOString();
       const orderId = `${name.replace(/\s+/g, "").toUpperCase()}${Date.now()}`;
 
+      const cartItems = CartManager.get();
+
       const data = {
         name,
         phone,
@@ -459,6 +504,7 @@ import "../styles/button.css";
         subtotal,
         deliveryFee: fee,
         total,
+        cartItems: cartItems,
       };
       localStorage.setItem("customerData", JSON.stringify(data));
       return data;
@@ -468,53 +514,50 @@ import "../styles/button.css";
       if (!this.validate()) return;
 
       const cust = this.saveCustomer();
+      const paymentMethod = cust.paymentMethod;
 
-      if (cust.paymentMethod === "transfer") {
+      if (paymentMethod === "cash") {
+        window.location.href = "/payment/cod";
+        return;
+      }
+
+      const transferMethods = ["MANDIRIVA", "BNIVA", "BCAVA", "BRIVA", "BSIVA"];
+      if (transferMethods.includes(paymentMethod)) {
         try {
-          const response = await fetch("/api/payment-co", {
+          const response = await fetch("/api/payment", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              name: cust.name,
-              phone: cust.phone,
-              address: cust.address,
-              total: cust.total,
-              orderId: cust.orderId,
+              amount: cust.total,
+              merchant_ref: cust.orderId,
+              customer_data: {
+                name: cust.name,
+                phone: cust.phone,
+                cartItems: cust.cartItems,
+                paymentMethod: paymentMethod,
+              },
             }),
           });
 
           const result = await response.json();
-          // eslint-disable-next-line no-console
-          console.log("Flip API:", result);
 
-          if (!result.success) {
-            alert(result.error || "Gagal memproses pembayaran.");
-            return;
+          if (result.success) {
+            console.log("Payment signature:", result.signature);
+            localStorage.setItem("paymentData", JSON.stringify(result.payment_data));
+            window.location.href = "/payment/va";
+          } else {
+            alert("Gagal memproses pembayaran. Silakan coba lagi.");
           }
-
-          const url = /^https?:\/\//i.test(result.link_url)
-            ? result.link_url
-            : `https://${result.link_url}`;
-
-          const flipData = { link_id: result.link_id, link_url: url };
-          localStorage.setItem("flipResponse", JSON.stringify(flipData));
-
-          localStorage.setItem("flipLinkId", result.link_id);
-          localStorage.setItem("flipLinkUrl", url);
-
-          // eslint-disable-next-line no-console
-          console.log("Redirecting to:", url);
-          window.location.href = url;
-        } catch (err) {
-          // eslint-disable-next-line no-console
-          console.error("Payment error:", err);
+        } catch (error) {
+          console.error("Payment error:", error);
           alert("Gagal memproses pembayaran. Silakan coba lagi.");
         }
-      } else {
-        window.location.href = "/payment/cod";
+        return;
       }
+
+      alert("Metode pembayaran belum tersedia. Silakan pilih bayar tunai.");
     }
   }
 
