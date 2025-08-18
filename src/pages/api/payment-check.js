@@ -15,7 +15,7 @@ export async function GET({ url }) {
       );
     }
 
-    const apiKey = "DEV-lI9srMGzs3C5BYnQpOjkTjBfvHB0ITNGvToxxzBx";
+    const apiKey = "ceLsUlkLPxn4XmsS0zUHi20vFbHejpxgMZhbwNGr";
     const FIXIE_URL = "http://fixie:qzN0pxTHPwP0GHH@criterium.usefixie.com:80";
 
     if (!apiKey) {

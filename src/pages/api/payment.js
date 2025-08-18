@@ -4,7 +4,18 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 
 export async function POST({ request }) {
   try {
-    const { amount, merchant_ref, customer_data } = await request.json();
+    const { 
+      amount, 
+      merchant_ref, 
+      order_items, 
+      customer_name, 
+      customer_phone, 
+      customer_email, 
+      payment_method,
+      subtotal,
+      shipping_fee,
+      admin_fee 
+    } = await request.json();
 
     if (!amount || !merchant_ref) {
       return new Response(
@@ -16,9 +27,9 @@ export async function POST({ request }) {
       );
     }
 
-    const apiKey = "DEV-lI9srMGzs3C5BYnQpOjkTjBfvHB0ITNGvToxxzBx";
-    const privateKey = "o6mML-3yiL3-5vtPr-tbQC6-uPpJm";
-    const merchant_code = "T44365";
+    const apiKey = "ceLsUlkLPxn4XmsS0zUHi20vFbHejpxgMZhbwNGr";
+    const privateKey = "SQDaL-f270F-zSxYk-BVPAx-2ZCun";
+    const merchant_code = "T44384";
     const FIXIE_URL = "http://fixie:qzN0pxTHPwP0GHH@criterium.usefixie.com:80";
 
     if (!apiKey || !privateKey || !merchant_code) {
@@ -37,21 +48,14 @@ export async function POST({ request }) {
       .update(merchant_code + merchant_ref + amount)
       .digest("hex");
 
-    const customerName = customer_data?.name ?? "";
-    const customerEmail = "customer@chechecakes.biz.id";
-    const customerPhone = customer_data?.phone ?? "";
-    const paymentMethod = customer_data?.paymentMethod ?? "";
+    const customerName = customer_name ?? "";
+    const customerEmail = customer_email ?? "customer@chechecakes.store";
+    const customerPhone = customer_phone ?? "";
+    const paymentMethod = payment_method ?? "";
 
     let orderItems = [];
-    if (
-      Array.isArray(customer_data?.cartItems) &&
-      customer_data.cartItems.length > 0
-    ) {
-      orderItems = customer_data.cartItems.map((item) => ({
-        name: item.name,
-        price: Number(item.price),
-        quantity: item.quantity,
-      }));
+    if (Array.isArray(order_items) && order_items.length > 0) {
+      orderItems = order_items;
     }
 
     const payload = {

@@ -36,13 +36,12 @@ import Button from "../../components/button.astro";
       <img src="/fail.svg" class="illust" alt="IllustCart" />
       <h2>Hmm... kayaknya belum berhasil nih</h2>
       <div class="description">
-        Kita belum dapet konfirmasi dari pembayaran kamu. Udah bayar? Coba
-        tunggu sebentar terus refresh aja.
+        Kita belum dapet konfirmasi dari pembayaran kamu. Udah bayar? Coba di
+        refresh aja.
       </div>
-      <Button>Refresh Halaman</Button>
+      <Button id="refreshBtn">Refresh Halaman</Button>
       <div class="description">
-        Kita belum dapet konfirmasi dari pembayaran kamu. Udah bayar? Coba
-        tunggu sebentar terus refresh aja.
+        Tapi kalo belum bayar, pastikan bayar dulu ya~
       </div>
       <Button>Balik ke halaman Pembayaran</Button>
     </div>
@@ -244,7 +243,7 @@ import Button from "../../components/button.astro";
   });
 </script> -->
 
-<script>
+<!-- <script>
   document.addEventListener("DOMContentLoaded", () => {
     const checkCard = document.getElementById("finishCardCheck");
     const successCard = document.getElementById("finishCardSuccess");
@@ -281,7 +280,10 @@ import Button from "../../components/button.astro";
         if (result.success) {
           const message = result.message || "";
 
-          if (message.includes("DIBAYAR") && !message.includes("UNPAID")) {
+          if (
+            (message.includes("DIBAYAR") && !message.includes("UNPAID")) ||
+            (message.includes("PAID") && !message.includes("UNPAID"))
+          ) {
             if (checkCard) checkCard.style.display = "none";
             if (successCard) successCard.style.display = "flex";
 
@@ -290,15 +292,69 @@ import Button from "../../components/button.astro";
             const whatsappButton = document.getElementById("whatsappButton");
             if (whatsappButton) {
               whatsappButton.addEventListener("click", () => {
-                // Ambil data customer dari localStorage
                 const customerData = JSON.parse(
                   localStorage.getItem("customerData") || "{}"
                 );
 
-                const message = `Halo Admin Cheche Cakes! Saya sudah melakukan pembayaran untuk pesanan dengan ID: ${customerData.orderId || reference}. Mohon segera diproses ya. Terima kasih!`;
+                // Fungsi untuk format rupiah
+                function formatRupiah(amount: number) {
+                  return `Rp${Number(amount).toLocaleString("id-ID")}`;
+                }
+
+                const lines = [
+                  `*PESANAN BARU*`,
+                  ``,
+                  `*Detail Pelanggan:*`,
+                  `Nama         : ${customerData.name}`,
+                  `No. WA       : ${customerData.phone}`,
+                  `Alamat       : ${customerData.address}`,
+                  `Metode Bayar : Transfer VA`,
+                  `Metode Kirim : ${customerData.deliveryMethod === "delivery" ? "Diantar" : "Ambil Sendiri"}`,
+                  ``,
+                  `*Detail Pesanan:*`,
+                ];
+
+                if (customerData.cartData && customerData.cartData.length) {
+                  customerData.cartData.forEach(
+                    (
+                      item: { name: string; quantity: number; price: number },
+                      i: number
+                    ) => {
+                      lines.push(
+                        `${i + 1}. ${item.name} x${item.quantity} = ${formatRupiah(item.price * item.quantity)}`
+                      );
+                    }
+                  );
+                }
+
+                if (customerData.cartItems && customerData.cartItems.length) {
+                  customerData.cartItems.forEach(
+                    (
+                      item: { name: string; quantity: number; price: number },
+                      i: number
+                    ) => {
+                      lines.push(
+                        `${i + 1}. ${item.name} x${item.quantity} = ${formatRupiah(item.price * item.quantity)}`
+                      );
+                    }
+                  );
+                }
+
+                lines.push(
+                  ``,
+                  `*Ringkasan Pembayaran:*`,
+                  `Subtotal : ${formatRupiah(customerData.subtotal)}`,
+                  `Ongkir   : ${formatRupiah(customerData.deliveryFee)}`,
+                  `Admin    : ${formatRupiah(customerData.adminFee)}`,
+                  `Total    : ${formatRupiah(customerData.total)}`,
+                  ``,
+                  `ID Pesanan: ${customerData.orderId || reference}`
+                );
+
+                const message = lines.join("\n");
 
                 window.open(
-                  `https://wa.me/6281234567890?text=${encodeURIComponent(message)}`,
+                  `https://wa.me/6285156220232?text=${encodeURIComponent(message)}`,
                   "_blank"
                 );
 
@@ -331,14 +387,13 @@ import Button from "../../components/button.astro";
             if (checkCard) checkCard.style.display = "none";
             if (failedCard) failedCard.style.display = "flex";
 
-            // Setup tombol refresh
-            const refreshButton = document.querySelector(
-              "#finishCardFailed Button:first-child"
-            );
+            function refreshPage() {
+              location.reload();
+            }
+
+            const refreshButton = document.querySelector("#refreshBtn");
             if (refreshButton) {
-              refreshButton.addEventListener("click", () => {
-                location.reload();
-              });
+              refreshButton.addEventListener("click", refreshPage);
             }
 
             const backToPaymentButton = document.querySelector(
@@ -367,6 +422,204 @@ import Button from "../../components/button.astro";
     // window.addEventListener("beforeunload", () => {
     //   clearInterval(intervalId);
     // });
+  });
+</script> -->
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // ===== Helpers =====
+    const setDisplay = (el: HTMLElement | null, value: string) => {
+      if (el) el.style.display = value;
+    };
+    const show = (el: HTMLElement | null) => setDisplay(el, "flex");
+    const hide = (el: HTMLElement | null) => setDisplay(el, "none");
+
+    const safeParse = (str: string) => {
+      try {
+        return JSON.parse(str || "{}");
+      } catch (e) {
+        console.error("JSON parse error:", e);
+        return {};
+      }
+    };
+
+    const isPaidMessage = (msg = "") =>
+      (msg.includes("DIBAYAR") && !msg.includes("UNPAID")) ||
+      (msg.includes("PAID") && !msg.includes("UNPAID"));
+
+    const formatRupiah = (amount: number) =>
+      `Rp${Number(amount).toLocaleString("id-ID")}`;
+
+    const buildWhatsAppMessage = (
+      customerData: {
+        name: string;
+        phone: string;
+        address: string;
+        deliveryMethod: string;
+        cartItems?: Array<{
+          name: string;
+          quantity: number;
+          price: number;
+        }>;
+        subtotal: number;
+        deliveryFee: number;
+        adminFee: number;
+        total: number;
+        orderId?: string;
+      },
+      reference: string
+    ) => {
+      const lines = [
+        `*PESANAN BARU*`,
+        ``,
+        `*Detail Pelanggan:*`,
+        `Nama         : ${customerData.name}`,
+        `No. WA       : ${customerData.phone}`,
+        `Alamat       : ${customerData.address}`,
+        `Metode Bayar : Transfer VA`,
+        `Metode Kirim : ${customerData.deliveryMethod === "delivery" ? "Diantar" : "Ambil Sendiri"}`,
+        ``,
+        `*Detail Pesanan:*`,
+      ];
+
+      if (customerData.cartItems && customerData.cartItems.length) {
+        customerData.cartItems.forEach(
+          (
+            item: { name: string; quantity: number; price: number },
+            i: number
+          ) => {
+            lines.push(
+              `${i + 1}. ${item.name} x${item.quantity} = ${formatRupiah(item.price * item.quantity)}`
+            );
+          }
+        );
+      }
+
+      lines.push(
+        ``,
+        `*Ringkasan Pembayaran:*`,
+        `Subtotal : ${formatRupiah(customerData.subtotal)}`,
+        `Ongkir   : ${formatRupiah(customerData.deliveryFee)}`,
+        `Admin    : ${formatRupiah(customerData.adminFee)}`,
+        `Total    : ${formatRupiah(customerData.total)}`,
+        ``,
+        `ID Pesanan: ${customerData.orderId || reference}`
+      );
+
+      return lines.join("\n");
+    };
+
+    // ===== Initialize cards =====
+    const checkCard = document.getElementById("finishCardCheck");
+    const successCard = document.getElementById("finishCardSuccess");
+    const failedCard = document.getElementById("finishCardFailed");
+
+    show(checkCard);
+    hide(successCard);
+    hide(failedCard);
+
+    // ===== Extract reference =====
+    let reference;
+    const paymentDataString = localStorage.getItem("paymentData");
+    if (paymentDataString) {
+      const paymentData = safeParse(paymentDataString);
+      try {
+        reference = paymentData.data && paymentData.data.reference;
+      } catch (error) {
+        console.error("Error parsing payment data:", error);
+      }
+    }
+
+    if (!reference) {
+      hide(checkCard);
+      show(failedCard);
+      return;
+    }
+
+    // ===== UI Handlers =====
+    const attachSuccessHandlers = () => {
+      const whatsappButton = document.getElementById("whatsappButton");
+      if (whatsappButton) {
+        whatsappButton.addEventListener("click", () => {
+          const customerData = safeParse(localStorage.getItem("customerData") || "{}");
+          function formatRupiah(amount: number) {
+            return `Rp${Number(amount).toLocaleString("id-ID")}`;
+          }
+          const message = buildWhatsAppMessage(customerData, reference);
+
+          window.open(
+            `https://wa.me/6285156220232?text=${encodeURIComponent(message)}`,
+            "_blank"
+          );
+
+          localStorage.setItem("whatsappSent", "true");
+        });
+      }
+
+      const backHomeButton = document.querySelector(
+        "#finishCardSuccess .buttonGroup button:first-child"
+      );
+      if (backHomeButton) {
+        backHomeButton.addEventListener("click", () => {
+          const whatsappSent = localStorage.getItem("whatsappSent") === "true";
+          if (whatsappSent) {
+            localStorage.removeItem("cart");
+            localStorage.removeItem("customerData");
+            localStorage.removeItem("paymentData");
+            localStorage.removeItem("whatsappSent");
+            window.location.href = "/";
+          } else {
+            alert("Jangan lupa kirim pesanan ke WhatsApp admin dulu ya! 🙏");
+          }
+        });
+      }
+    };
+
+    const attachFailedHandlers = () => {
+      const refreshPage = () => location.reload();
+
+      const refreshButton = document.querySelector("#refreshBtn");
+      if (refreshButton) refreshButton.addEventListener("click", refreshPage);
+
+      // NOTE: keep original selector casing as requested (no value/variable change)
+      const backToPaymentButton = document.querySelector(
+        "#finishCardFailed Button:last-child"
+      );
+      if (backToPaymentButton) {
+        backToPaymentButton.addEventListener("click", () => {
+          window.location.href = "/payment/va";
+        });
+      }
+    };
+
+    // ===== Core flow =====
+    const checkPaymentStatus = async () => {
+      try {
+        const response = await fetch(
+          `/api/payment-check?reference=${reference}`
+        );
+        const result = await response.json();
+
+        if (result.success && isPaidMessage(result.message || "")) {
+          hide(checkCard);
+          show(successCard);
+          attachSuccessHandlers();
+        } else {
+          hide(checkCard);
+          show(failedCard);
+          attachFailedHandlers();
+        }
+      } catch (error) {
+        console.error("Error checking payment status:", error);
+        hide(checkCard);
+        show(failedCard);
+        attachFailedHandlers();
+      }
+    };
+
+    checkPaymentStatus();
+    // const intervalId = setInterval(checkPaymentStatus, 20000);
+    // window.addEventListener("beforeunload", () => { clearInterval(intervalId); });
   });
 </script>
 
