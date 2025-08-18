@@ -61,7 +61,7 @@ import "../styles/button.css";
             <div class="paymentGroupHeader">Pembayaran Online (VA)</div>
             <div class="options">
               <label class="option">
-                <input type="radio" name="payment" value="MANDIRIVA" />
+                <input type="radio" name="payment" value="MANDIRIVA" checked />
                 <div class="optionContent">
                   <div class="optionTitle">Transfer VA Mandiri</div>
                   <div class="optionDesc">
@@ -118,7 +118,7 @@ import "../styles/button.css";
             <div class="paymentGroupHeader">Pembayaran Tunai</div>
             <div class="options">
               <label class="option">
-                <input type="radio" name="payment" value="cash" checked />
+                <input type="radio" name="payment" value="cash" />
                 <div class="optionContent">
                   <div class="optionTitle">Bayar tunai</div>
                   <div class="optionDesc">
@@ -178,6 +178,10 @@ import "../styles/button.css";
         <div class="deliveryFee">
           <div class="label">Ongkir</div>
           <div class="value" id="deliveryValue">Rp10.000</div>
+        </div>
+        <div class="adminFee">
+          <div class="label">Admin</div>
+          <div class="value" id="adminFeeValue">Rp2.500</div>
         </div>
         <div class="noteFee">
           Karena belanja kamu banyak, ongkirnya jadi cuma Rp5.000 aja 🎉
@@ -295,6 +299,7 @@ import "../styles/button.css";
       this.el.paymentRadios.forEach((r) =>
         r.addEventListener("change", () => {
           this.updatePaymentNote();
+          this.updateTotals();
         })
       );
       this.el.checkoutBtn?.addEventListener("click", (e) => {
@@ -380,6 +385,19 @@ import "../styles/button.css";
       )?.value;
       let fee = 0;
 
+      // Biaya admin berdasarkan metode pembayaran
+      const paymentMethod = document.querySelector(
+        'input[name="payment"]:checked'
+      )?.value;
+      let adminFee = 0;
+
+      // Set biaya admin berdasarkan jenis VA
+      if (paymentMethod === "MANDIRIVA") adminFee = 2125;
+      else if (paymentMethod === "BNIVA") adminFee = 2125;
+      else if (paymentMethod === "BCAVA") adminFee = 2750;
+      else if (paymentMethod === "BRIVA") adminFee = 2125;
+      else if (paymentMethod === "BSIVA") adminFee = 2125;
+
       if (method === "delivery") {
         fee = subtotal >= 60000 ? 5000 : 10000;
         const code = this.el.promoInput.value.toUpperCase();
@@ -389,14 +407,33 @@ import "../styles/button.css";
         fee = 0;
         this.el.noteFee.style.display = "none";
       }
-      return { subtotal, fee, total: subtotal + fee, method };
+      return {
+        subtotal,
+        fee,
+        adminFee,
+        total: subtotal + fee + adminFee,
+        method,
+        paymentMethod,
+      };
     }
 
     static updateTotals() {
-      const { subtotal, fee, total, method } = this.calculate();
+      const { subtotal, fee, adminFee, total, method, paymentMethod } =
+        this.calculate();
       this.el.subtotalVal.textContent = formatRupiah(subtotal);
       this.el.deliveryVal.textContent =
         method === "takeaway" ? "Gratis" : formatRupiah(fee);
+
+      const adminFeeElement = document.getElementById("adminFeeValue");
+      if (adminFeeElement) {
+        if (adminFee > 0) {
+          adminFeeElement.textContent = formatRupiah(adminFee);
+          adminFeeElement.parentElement.style.display = "flex";
+        } else {
+          adminFeeElement.parentElement.style.display = "none";
+        }
+      }
+
       this.el.totalVal.textContent = formatRupiah(total);
     }
 
@@ -487,7 +524,7 @@ import "../styles/button.css";
       const dm =
         document.querySelector('input[name="delivery"]:checked')?.value ||
         "delivery";
-      const { subtotal, fee, total } = this.calculate();
+      const { subtotal, fee, adminFee, total } = this.calculate();
       const ts = new Date().toISOString();
       const orderId = `${name.replace(/\s+/g, "").toUpperCase()}${Date.now()}`;
 
@@ -503,6 +540,7 @@ import "../styles/button.css";
         orderId,
         subtotal,
         deliveryFee: fee,
+        adminFee: adminFee,
         total,
         cartItems: cartItems,
       };
@@ -512,51 +550,130 @@ import "../styles/button.css";
 
     static async handleCheckout() {
       if (!this.validate()) return;
-
+      
+      // Tambahkan indikator loading pada tombol
+      const checkoutBtn = this.el.checkoutBtn;
+      const originalText = checkoutBtn.textContent;
+      checkoutBtn.textContent = "Loading...";
+      checkoutBtn.disabled = true;
+    
       const cust = this.saveCustomer();
       const paymentMethod = cust.paymentMethod;
-
+    
       if (paymentMethod === "cash") {
         window.location.href = "/payment/cod";
         return;
       }
-
+    
       const transferMethods = ["MANDIRIVA", "BNIVA", "BCAVA", "BRIVA", "BSIVA"];
       if (transferMethods.includes(paymentMethod)) {
         try {
+          // Hitung total dari cartItems untuk memastikan konsistensi
+          const itemsTotal = cust.cartItems.reduce((sum, item) => {
+            return sum + Number(item.price) * item.quantity;
+          }, 0);
+    
+          // Format order_items sesuai dengan yang diharapkan API
+          const order_items = cust.cartItems.map((item) => ({
+            sku: item.id,
+            name: item.name,
+            price: Number(item.price),
+            quantity: item.quantity,
+            subtotal: Number(item.price) * item.quantity,
+          }));
+    
+          // Tambahkan ongkir sebagai item jika ada
+          if (cust.deliveryFee > 0) {
+            order_items.push({
+              sku: "SHIPPING",
+              name: "Biaya Pengiriman",
+              price: cust.deliveryFee,
+              quantity: 1,
+              subtotal: cust.deliveryFee
+            });
+          }
+    
+          // Tambahkan biaya admin sebagai item jika ada
+          if (cust.adminFee > 0) {
+            order_items.push({
+              sku: "ADMINFEE",
+              name: `Biaya Admin ${paymentMethod}`,
+              price: cust.adminFee,
+              quantity: 1,
+              subtotal: cust.adminFee
+            });
+          }
+    
+          // Verifikasi total
+          const orderItemsTotal = order_items.reduce((sum, item) => sum + item.subtotal, 0);
+          console.log("Total dari order_items (dengan biaya tambahan):", orderItemsTotal);
+          console.log("Total dari cust.total:", cust.total);
+    
+          // Pastikan total sama persis
+          if (orderItemsTotal !== cust.total) {
+            console.error("Total tidak sama! Perbedaan:", cust.total - orderItemsTotal);
+          }
+    
+          // Hapus biaya admin dari order_items karena Tripay akan menambahkannya otomatis
+          const filteredOrderItems = order_items.filter(item => item.sku !== "ADMINFEE");
+          const amountWithoutAdminFee = cust.total - cust.adminFee;
+    
+          const requestBody = {
+            amount: amountWithoutAdminFee, // Kirim amount tanpa biaya admin
+            merchant_ref: cust.orderId,
+            order_items: filteredOrderItems, // Gunakan order_items tanpa item biaya admin
+            customer_name: cust.name,
+            customer_phone: cust.phone,
+            customer_email: "customer@chechecakes.store",
+            payment_method: paymentMethod,
+            subtotal: cust.subtotal,
+            shipping_fee: cust.deliveryFee,
+            admin_fee: cust.adminFee, // Tetap kirim informasi admin_fee untuk referensi
+          };
+    
+          console.log("Request body:", requestBody);
+    
           const response = await fetch("/api/payment", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-              amount: cust.total,
-              merchant_ref: cust.orderId,
-              customer_data: {
-                name: cust.name,
-                phone: cust.phone,
-                cartItems: cust.cartItems,
-                paymentMethod: paymentMethod,
-              },
-            }),
+            body: JSON.stringify(requestBody),
           });
-
+    
           const result = await response.json();
-
-          if (result.success) {
+          console.log("API response:", result);
+    
+          if (result.success == true) {
             console.log("Payment signature:", result.signature);
-            localStorage.setItem("paymentData", JSON.stringify(result.payment_data));
+            localStorage.setItem(
+              "paymentData",
+              JSON.stringify(result.payment_data)
+            );
             window.location.href = "/payment/va";
           } else {
-            alert("Gagal memproses pembayaran. Silakan coba lagi.");
+            console.error("Payment processing failed:", result);
+            // Kembalikan tombol ke keadaan semula jika gagal
+            checkoutBtn.textContent = originalText;
+            checkoutBtn.disabled = false;
+            alert(
+              "Gagal memproses pembayaran: " +
+                (result.message || "Silakan coba lagi.")
+            );
           }
         } catch (error) {
           console.error("Payment error:", error);
+          // Kembalikan tombol ke keadaan semula jika terjadi error
+          checkoutBtn.textContent = originalText;
+          checkoutBtn.disabled = false;
           alert("Gagal memproses pembayaran. Silakan coba lagi.");
         }
         return;
       }
-
+    
+      // Kembalikan tombol ke keadaan semula jika metode pembayaran tidak tersedia
+      checkoutBtn.textContent = originalText;
+      checkoutBtn.disabled = false;
       alert("Metode pembayaran belum tersedia. Silakan pilih bayar tunai.");
     }
   }

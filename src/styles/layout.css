@@ -191,3 +191,9 @@ nav img {
     0 10px 32px -4px rgba(24, 39, 75, 0.1);
   border-radius: 4px;
 }
+
+@media screen and (max-width: 1024px) {
+  .helpFaq {
+    display: none;
+  }
+}

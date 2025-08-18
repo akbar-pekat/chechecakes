@@ -290,17 +290,9 @@
   font-weight: 400;
 }
 
-.deliveryFee {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: space-between;
-  align-self: stretch;
-  position: relative;
-  overflow: hidden;
-}
-
-.totalContainer {
+.deliveryFee,
+.totalContainer,
+.adminFee {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
